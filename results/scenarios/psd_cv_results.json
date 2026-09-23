@@ -1,0 +1,11 @@
+{
+  "accuracy": 0.8083452372002105,
+  "precision_rvot": 0.8083452372002105,
+  "precision_lvot": 0.0,
+  "recall_rvot": 1.0,
+  "recall_lvot": 0.0,
+  "f1_rvot": 0.8940158606250719,
+  "f1_lvot": 0.0,
+  "macro_f1": 0.44700793031253594,
+  "balanced_accuracy": 0.5
+}

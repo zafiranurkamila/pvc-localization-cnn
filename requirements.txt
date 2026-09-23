@@ -1,0 +1,14 @@
+numpy
+pandas
+scipy
+matplotlib
+seaborn
+scikit-learn
+PyWavelets
+neurokit2
+torch
+shap
+pyyaml
+tqdm
+openpyxl
+jupyter
