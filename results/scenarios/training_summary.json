@@ -1,0 +1,19 @@
+{
+  "status": {
+    "baseline": "skipped (sudah ada)",
+    "psd": "skipped (sudah ada)",
+    "wavelet": "skipped (sudah ada)",
+    "hos": "completed",
+    "psd_wavelet": "completed",
+    "psd_hos": "completed",
+    "wavelet_hos": "completed",
+    "psd_wavelet_hos": "completed"
+  },
+  "durasi_menit": {
+    "hos": 3.9,
+    "psd_wavelet": 45.0,
+    "psd_hos": 7.9,
+    "wavelet_hos": 56.6,
+    "psd_wavelet_hos": 56.3
+  }
+}
