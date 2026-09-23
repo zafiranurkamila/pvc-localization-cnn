@@ -62,6 +62,12 @@ class PVCBeatsDataset(Dataset):
     def __len__(self):
         return len(self.beats_list)
 
+    def labels(self) -> list[int]:
+        return [config.LABEL_TO_INT[label] for _, label, _, _ in self.beats_list]
+
+    def patient_groups(self) -> list[int]:
+        return [hospital_id for hospital_id, _, _, _ in self.beats_list]
+
     def __getitem__(self, idx: int):
         hospital_id, label, beat_idx, beat_raw = self.beats_list[idx]
         beat = zscore_normalize(beat_raw)
@@ -70,9 +76,10 @@ class PVCBeatsDataset(Dataset):
         cache_key = f"{hospital_id}_beat{beat_idx}_" + "_".join(sorted(self.feature_scenario) or ["baseline"])
 
         features = {}
-        # Always extract psd (used for baseline model and psd-based fusion)
-        features["psd"] = self._get_or_compute(cache_key + "_psd", lambda: flatten_psd_features(beat))
-
+        if not self.feature_scenario:
+            features["raw"] = beat.astype(np.float32)
+        if "psd" in self.feature_scenario:
+            features["psd"] = self._get_or_compute(cache_key + "_psd", lambda: flatten_psd_features(beat))
         if "wavelet" in self.feature_scenario:
             features["wavelet"] = self._get_or_compute(
                 cache_key + "_wavelet",

@@ -71,15 +71,18 @@ class FusionCNN(nn.Module):
 
 
 class BaselineCNN(nn.Module):
-    """Simple 1D CNN baseline (no multi-branch)."""
+    """1D CNN on the raw 12-lead beat, without hand-crafted features."""
 
-    def __init__(self, input_size: int = 384, num_classes: int = 2, hidden_dim: int = 64):
+    def __init__(self, n_leads: int = 12, num_classes: int = 2, hidden_dim: int = 64):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Conv1d(1, 32, kernel_size=5, padding=2),
+            nn.Conv1d(n_leads, 32, kernel_size=7, padding=3),
             nn.ReLU(),
-            nn.MaxPool1d(2),
-            nn.Conv1d(32, hidden_dim, kernel_size=5, padding=2),
+            nn.MaxPool1d(4),
+            nn.Conv1d(32, hidden_dim, kernel_size=7, padding=3),
+            nn.ReLU(),
+            nn.MaxPool1d(4),
+            nn.Conv1d(hidden_dim, hidden_dim, kernel_size=5, padding=2),
             nn.ReLU(),
             nn.AdaptiveAvgPool1d(16),
             nn.Flatten(),
@@ -89,6 +92,5 @@ class BaselineCNN(nn.Module):
             nn.Linear(hidden_dim, num_classes),
         )
 
-    def forward(self, psd: torch.Tensor) -> torch.Tensor:
-        x = psd.unsqueeze(1)  # (batch, 1, input_size)
-        return self.net(x)
+    def forward(self, raw: torch.Tensor) -> torch.Tensor:
+        return self.net(raw)  # raw: (batch, n_leads, window_len)

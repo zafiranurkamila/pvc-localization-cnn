@@ -57,7 +57,7 @@ def main():
             if feature_types:
                 logits = model(batch_device)
             else:
-                logits = model(batch_device["psd"])
+                logits = model(batch_device["raw"])
 
             print(f"  Batch {batch_idx + 1}: logits shape {logits.shape}, predictions {logits.argmax(dim=1).cpu().numpy()}")
 

@@ -56,7 +56,7 @@ def main():
     print("="*70)
     todo = []
     for scenario in scenarios:
-        done = (results_dir / f"{scenario}_cv_results.json").exists()
+        done = (results_dir / f"{scenario}_results.json").exists()
         print(f"{scenario:<20} {'SUDAH' if done else 'BELUM'}")
         if not done or args.force:
             todo.append(scenario)
