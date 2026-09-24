@@ -1,0 +1,173 @@
+{
+  "scenario": "psd",
+  "features": [
+    "psd"
+  ],
+  "config": {
+    "epochs": 50,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "n_folds": 5,
+    "cv": "StratifiedGroupKFold per pasien",
+    "class_weight": "balanced",
+    "seed": 42
+  },
+  "cv_mean": {
+    "accuracy": 0.7029321103676416,
+    "precision_rvot": 0.8208254925873348,
+    "precision_lvot": 0.0885304659498208,
+    "recall_rvot": 0.8175438596491228,
+    "recall_lvot": 0.21575757575757576,
+    "f1_rvot": 0.7927187499999999,
+    "f1_lvot": 0.12138312586445368,
+    "macro_f1": 0.45705093793222684,
+    "balanced_accuracy": 0.5166507177033492,
+    "auc": 0.5053952624124233
+  },
+  "cv_std": {
+    "accuracy": 0.14621146837238416,
+    "precision_rvot": 0.018002754352335004,
+    "precision_lvot": 0.10842871515169168,
+    "recall_rvot": 0.25073913512093443,
+    "recall_lvot": 0.2946377209272512,
+    "f1_rvot": 0.14909364312661197,
+    "f1_lvot": 0.15047335410377155,
+    "macro_f1": 0.031593304372975965,
+    "balanced_accuracy": 0.022015962481342136,
+    "auc": 0.11515079950084514
+  },
+  "cv_folds": [
+    {
+      "accuracy": 0.4381625441696113,
+      "precision_rvot": 0.8556701030927835,
+      "precision_lvot": 0.22043010752688172,
+      "recall_rvot": 0.36403508771929827,
+      "recall_lvot": 0.7454545454545455,
+      "f1_rvot": 0.5107692307692308,
+      "f1_lvot": 0.34024896265560167,
+      "macro_f1": 0.4255090967124162,
+      "balanced_accuracy": 0.5547448165869219,
+      "auc": 0.6704146730462519,
+      "confusion_matrix": [
+        [
+          83,
+          145
+        ],
+        [
+          14,
+          41
+        ]
+      ]
+    },
+    {
+      "accuracy": 0.8091872791519434,
+      "precision_rvot": 0.8091872791519434,
+      "precision_lvot": 0.0,
+      "recall_rvot": 1.0,
+      "recall_lvot": 0.0,
+      "f1_rvot": 0.89453125,
+      "f1_lvot": 0.0,
+      "macro_f1": 0.447265625,
+      "balanced_accuracy": 0.5,
+      "auc": 0.5271712760795731,
+      "confusion_matrix": [
+        [
+          229,
+          0
+        ],
+        [
+          54,
+          0
+        ]
+      ]
+    },
+    {
+      "accuracy": 0.8091872791519434,
+      "precision_rvot": 0.8091872791519434,
+      "precision_lvot": 0.0,
+      "recall_rvot": 1.0,
+      "recall_lvot": 0.0,
+      "f1_rvot": 0.89453125,
+      "f1_lvot": 0.0,
+      "macro_f1": 0.447265625,
+      "balanced_accuracy": 0.5,
+      "auc": 0.3150574154940967,
+      "confusion_matrix": [
+        [
+          229,
+          0
+        ],
+        [
+          54,
+          0
+        ]
+      ]
+    },
+    {
+      "accuracy": 0.8091872791519434,
+      "precision_rvot": 0.8091872791519434,
+      "precision_lvot": 0.0,
+      "recall_rvot": 1.0,
+      "recall_lvot": 0.0,
+      "f1_rvot": 0.89453125,
+      "f1_lvot": 0.0,
+      "macro_f1": 0.447265625,
+      "balanced_accuracy": 0.5,
+      "auc": 0.4728287239204269,
+      "confusion_matrix": [
+        [
+          229,
+          0
+        ],
+        [
+          54,
+          0
+        ]
+      ]
+    },
+    {
+      "accuracy": 0.648936170212766,
+      "precision_rvot": 0.8208955223880597,
+      "precision_lvot": 0.2222222222222222,
+      "recall_rvot": 0.7236842105263158,
+      "recall_lvot": 0.3333333333333333,
+      "f1_rvot": 0.7692307692307693,
+      "f1_lvot": 0.26666666666666666,
+      "macro_f1": 0.517948717948718,
+      "balanced_accuracy": 0.5285087719298246,
+      "auc": 0.5415042235217674,
+      "confusion_matrix": [
+        [
+          165,
+          63
+        ],
+        [
+          36,
+          18
+        ]
+      ]
+    }
+  ],
+  "test": {
+    "accuracy": 0.7110481586402266,
+    "precision_rvot": 0.7110481586402266,
+    "precision_lvot": 0.0,
+    "recall_rvot": 1.0,
+    "recall_lvot": 0.0,
+    "f1_rvot": 0.8311258278145696,
+    "f1_lvot": 0.0,
+    "macro_f1": 0.4155629139072848,
+    "balanced_accuracy": 0.5,
+    "auc": 0.4707054136395594,
+    "confusion_matrix": [
+      [
+        251,
+        0
+      ],
+      [
+        102,
+        0
+      ]
+    ]
+  }
+}

@@ -10,13 +10,13 @@
     "psd_wavelet_hos": "completed"
   },
   "durasi_menit": {
-    "baseline": 1.6,
-    "psd": 3.1,
-    "wavelet": 50.4,
-    "hos": 3.9,
-    "psd_wavelet": 49.4,
-    "psd_hos": 5.6,
-    "wavelet_hos": 52.3,
-    "psd_wavelet_hos": 53.0
+    "baseline": 1.5,
+    "psd": 2.9,
+    "wavelet": 14.1,
+    "hos": 3.3,
+    "psd_wavelet": 16.4,
+    "psd_hos": 4.8,
+    "wavelet_hos": 16.4,
+    "psd_wavelet_hos": 11.3
   }
 }
