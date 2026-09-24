@@ -1,8 +1,8 @@
 {
   "status": {
-    "baseline": "skipped (sudah ada)",
-    "psd": "skipped (sudah ada)",
-    "wavelet": "skipped (sudah ada)",
+    "baseline": "completed",
+    "psd": "completed",
+    "wavelet": "completed",
     "hos": "completed",
     "psd_wavelet": "completed",
     "psd_hos": "completed",
@@ -10,10 +10,13 @@
     "psd_wavelet_hos": "completed"
   },
   "durasi_menit": {
+    "baseline": 1.6,
+    "psd": 3.1,
+    "wavelet": 50.4,
     "hos": 3.9,
-    "psd_wavelet": 45.0,
-    "psd_hos": 7.9,
-    "wavelet_hos": 56.6,
-    "psd_wavelet_hos": 56.3
+    "psd_wavelet": 49.4,
+    "psd_hos": 5.6,
+    "wavelet_hos": 52.3,
+    "psd_wavelet_hos": 53.0
   }
 }
