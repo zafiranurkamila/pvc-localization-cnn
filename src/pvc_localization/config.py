@@ -43,9 +43,15 @@ BEAT_LENGTH_SAMPLES = BEAT_PRE_SAMPLES + BEAT_POST_SAMPLES
 # Lead used for R-peak detection (best QRS visibility in most 12-lead ECGs).
 RPEAK_DETECTION_LEAD = "II"
 
+# Frequency band of interest for all spectral features (ECG energy lies below ~40 Hz).
+FEATURE_FMIN_HZ = 0.5
+FEATURE_FMAX_HZ = 60.0
+
 # CWT settings for the Wavelet scalogram branch (2D-Conv input).
 CWT_WAVELET = "cmor1.5-1.0"
 CWT_NUM_SCALES = 64
+CWT_FMIN_HZ = 2.0
+CWT_TIME_DOWNSAMPLE = 8
 
 FEATURE_SCENARIOS = {
     "baseline": [],

@@ -13,42 +13,31 @@ from pvc_localization import config
 
 
 def extract_psd_features(beat: np.ndarray, fs: int = config.SAMPLING_RATE_HZ,
-                         nperseg: int = None, n_freqs: int = 32) -> np.ndarray:
-    """Extract PSD features from one beat across all 12 leads.
+                         nperseg: int = None, n_freqs: int = 32,
+                         fmin: float = config.FEATURE_FMIN_HZ,
+                         fmax: float = config.FEATURE_FMAX_HZ) -> np.ndarray:
+    """Extract log-PSD features in the ECG band from one beat across all 12 leads.
 
     Args:
         beat: (n_leads=12, window_len) array, already normalized
         fs: sampling rate in Hz
         nperseg: FFT window length for Welch (default: beat window length)
-        n_freqs: number of frequency bins to return per lead
+        n_freqs: number of frequency bins per lead, evenly spaced over [fmin, fmax]
 
     Returns:
-        features: (12, n_freqs) array with PSD values for each lead
+        features: (12, n_freqs) array of log10 mean power per bin
     """
     if nperseg is None:
         nperseg = beat.shape[1]
 
-    n_leads = beat.shape[0]
-    features = np.zeros((n_leads, n_freqs))
+    freqs, psd = welch(beat, fs=fs, nperseg=nperseg, axis=-1)
+    bin_idx = np.digitize(freqs, np.linspace(fmin, fmax, n_freqs + 1)) - 1
 
-    for lead_idx in range(n_leads):
-        signal = beat[lead_idx, :]
-        freqs, psd = welch(signal, fs=fs, nperseg=nperseg)
+    features = np.zeros((beat.shape[0], n_freqs))
+    for b in range(n_freqs):
+        features[:, b] = psd[:, bin_idx == b].mean(axis=1)
 
-        # Resample PSD to fixed number of frequency bins
-        if len(psd) > n_freqs:
-            # Downsample by taking every nth element
-            step = len(psd) // n_freqs
-            features[lead_idx, :] = psd[::step][:n_freqs]
-        else:
-            # Upsample by interpolation
-            features[lead_idx, :] = np.interp(
-                np.linspace(0, len(psd) - 1, n_freqs),
-                np.arange(len(psd)),
-                psd
-            )
-
-    return features
+    return np.log10(features + 1e-12)
 
 
 def flatten_psd_features(beat: np.ndarray, fs: int = config.SAMPLING_RATE_HZ,

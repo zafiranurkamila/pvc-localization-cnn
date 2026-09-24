@@ -16,15 +16,19 @@ from pvc_localization import config
 
 
 @lru_cache(maxsize=8)
-def _bispectrum_grid(n_freqs: int):
-    f1_idx, f2_idx = np.meshgrid(np.arange(n_freqs), np.arange(n_freqs), indexing="ij")
+def _bispectrum_grid(n_keep: int, n_freqs: int):
+    f1_idx, f2_idx = np.meshgrid(np.arange(n_keep), np.arange(n_keep), indexing="ij")
     mask = (f1_idx + f2_idx) < n_freqs
     f3_idx = np.where(mask, f1_idx + f2_idx, 0)
     return f1_idx, f2_idx, f3_idx, mask
 
 
-def bispectrum_direct(x: np.ndarray, nperseg: int = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Compute bispectrum via direct FFT-based triple product."""
+def bispectrum_direct(x: np.ndarray, nperseg: int = None,
+                      max_bins: int = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compute bispectrum via direct FFT-based triple product.
+
+    max_bins: only compute the lowest max_bins frequency bins on each axis.
+    """
     if nperseg is None:
         nperseg = len(x)
 
@@ -41,7 +45,8 @@ def bispectrum_direct(x: np.ndarray, nperseg: int = None) -> tuple[np.ndarray, n
 
         # B(f1, f2) = X(f1) * X(f2) * conj(X(f1 + f2)), region f1 + f2 < n_freqs
         n_freqs = nfft // 2
-        f1_idx, f2_idx, f3_idx, mask = _bispectrum_grid(n_freqs)
+        n_keep = n_freqs if max_bins is None else min(max_bins, n_freqs)
+        f1_idx, f2_idx, f3_idx, mask = _bispectrum_grid(n_keep, n_freqs)
         bispectrum_seg = X[f1_idx] * X[f2_idx] * np.conj(X[f3_idx])
         bispectrum_seg[~mask] = 0
 
@@ -51,21 +56,17 @@ def bispectrum_direct(x: np.ndarray, nperseg: int = None) -> tuple[np.ndarray, n
             bispectrum_sum += bispectrum_seg
 
     bispectrum = np.abs(bispectrum_sum) / n_segments
-    freqs = np.fft.fftfreq(nfft, d=1.0)[:n_freqs]
+    freqs = np.fft.fftfreq(nfft, d=1.0)[:n_keep]
 
     return bispectrum, freqs, freqs
 
 
 def bispectrum_features(bispectrum: np.ndarray, n_bins: int = 16) -> np.ndarray:
-    """Reduce 2D bispectrum to fixed-size (n_bins * n_bins,) feature vector."""
-    if bispectrum.shape[0] != n_bins or bispectrum.shape[1] != n_bins:
-        src_i = np.arange(n_bins) * bispectrum.shape[0] // n_bins
-        src_j = np.arange(n_bins) * bispectrum.shape[1] // n_bins
-        bispectrum_resized = bispectrum[np.ix_(src_i, src_j)]
-    else:
-        bispectrum_resized = bispectrum
-
-    return bispectrum_resized.flatten()
+    """Average-pool the 2D bispectrum into n_bins x n_bins blocks, log-scaled, flattened."""
+    rows = np.array_split(np.arange(bispectrum.shape[0]), n_bins)
+    cols = np.array_split(np.arange(bispectrum.shape[1]), n_bins)
+    pooled = np.array([[bispectrum[np.ix_(r, c)].mean() for c in cols] for r in rows])
+    return np.log1p(pooled).flatten()
 
 
 def higher_order_moments(x: np.ndarray) -> dict:
@@ -100,7 +101,10 @@ def extract_hos_features(beat: np.ndarray, fs: int = config.SAMPLING_RATE_HZ,
     for lead_idx in range(n_leads):
         signal = beat[lead_idx, :]
 
-        bisp, _, _ = bispectrum_direct(signal, nperseg=len(signal) // 2)
+        nperseg = len(signal) // 2
+        nfft = 2 ** int(np.ceil(np.log2(nperseg)))
+        n_band = int(config.FEATURE_FMAX_HZ * nfft / fs) + 1
+        bisp, _, _ = bispectrum_direct(signal, nperseg=nperseg, max_bins=n_band)
         bisp_features = bispectrum_features(bisp, n_bins=bispectrum_n_bins)
         features[idx : idx + bispectrum_size] = bisp_features
         idx += bispectrum_size

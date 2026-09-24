@@ -16,6 +16,7 @@ class PSDBlock(nn.Module):
 
     def __init__(self, input_size: int = 384, hidden: int = 64):
         super().__init__()
+        self.input_norm = nn.BatchNorm1d(input_size)
         self.net = nn.Sequential(
             nn.Conv1d(1, 32, kernel_size=5, padding=2),
             nn.ReLU(),
@@ -28,7 +29,7 @@ class PSDBlock(nn.Module):
 
     def forward(self, x):
         # x shape: (batch, input_size)
-        x = x.unsqueeze(1)  # (batch, 1, input_size)
+        x = self.input_norm(x).unsqueeze(1)  # (batch, 1, input_size)
         x = self.net(x)
         return x.view(x.size(0), -1)  # (batch, output_size)
 
@@ -38,6 +39,7 @@ class WaveletBlock(nn.Module):
 
     def __init__(self, n_leads: int = 12, hidden: int = 64):
         super().__init__()
+        self.input_norm = nn.BatchNorm2d(n_leads)
         self.net = nn.Sequential(
             nn.Conv2d(n_leads, 32, kernel_size=(3, 3), padding=1),
             nn.ReLU(),
@@ -49,8 +51,8 @@ class WaveletBlock(nn.Module):
         self.output_size = hidden * 4 * 4
 
     def forward(self, x):
-        # x shape: (batch, n_leads, n_scales, window_len)
-        x = self.net(x)
+        # x shape: (batch, n_leads, n_scales, n_time)
+        x = self.net(self.input_norm(x))
         return x.view(x.size(0), -1)  # (batch, output_size)
 
 
@@ -59,6 +61,7 @@ class HOSBlock(nn.Module):
 
     def __init__(self, input_size: int = 792, hidden: int = 64):
         super().__init__()
+        self.input_norm = nn.BatchNorm1d(input_size)
         self.net = nn.Sequential(
             nn.Conv1d(1, 32, kernel_size=5, padding=2),
             nn.ReLU(),
@@ -71,6 +74,6 @@ class HOSBlock(nn.Module):
 
     def forward(self, x):
         # x shape: (batch, input_size)
-        x = x.unsqueeze(1)  # (batch, 1, input_size)
+        x = self.input_norm(x).unsqueeze(1)  # (batch, 1, input_size)
         x = self.net(x)
         return x.view(x.size(0), -1)  # (batch, output_size)

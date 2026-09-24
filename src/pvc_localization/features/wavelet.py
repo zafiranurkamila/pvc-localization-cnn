@@ -25,28 +25,22 @@ def extract_cwt_scalogram(beat: np.ndarray,
         fs: sampling rate
 
     Returns:
-        scalograms: (12, n_scales, window_len) array where each [lead, :, :]
-                   is a time-frequency representation suitable for 2D-Conv
+        scalograms: (12, n_scales, window_len // CWT_TIME_DOWNSAMPLE) log-magnitude
+                   time-frequency maps over CWT_FMIN_HZ..FEATURE_FMAX_HZ, for 2D-Conv
     """
     n_leads, window_len = beat.shape
 
-    # Linear scale spacing: maps to frequency range roughly 5 Hz to 500 Hz
-    min_freq = 5.0
-    max_freq = fs / 2  # Nyquist
-    scales = np.linspace(1, n_scales, n_scales)
-    scales = fs / (2 * np.pi * np.linspace(min_freq, max_freq, n_scales))
+    freqs = np.geomspace(config.CWT_FMIN_HZ, config.FEATURE_FMAX_HZ, n_scales)
+    scales = pywt.central_frequency(wavelet) * fs / freqs
 
-    scalograms = np.zeros((n_leads, n_scales, window_len))
+    coeffs, _ = pywt.cwt(beat, scales, wavelet, method="fft", axis=-1)  # (n_scales, n_leads, window_len)
+    magnitude = np.abs(coeffs).transpose(1, 0, 2)
 
-    for lead_idx in range(n_leads):
-        signal = beat[lead_idx, :]
-        # Compute CWT for this lead
-        # cwt returns (n_scales, n_samples)
-        coeffs, _ = pywt.cwt(signal, scales, wavelet)
-        # Take absolute value (magnitude)
-        scalograms[lead_idx, :, :] = np.abs(coeffs)
+    ds = config.CWT_TIME_DOWNSAMPLE
+    n_time = window_len // ds
+    magnitude = magnitude[:, :, :n_time * ds].reshape(n_leads, n_scales, n_time, ds).mean(axis=-1)
 
-    return scalograms
+    return np.log1p(magnitude)
 
 
 def flatten_cwt_features(beat: np.ndarray,

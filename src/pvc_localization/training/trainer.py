@@ -64,7 +64,8 @@ class CVTrainer:
         return fold_results, test_metrics
 
     def _loader(self, dataset, batch_size, shuffle):
-        return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=0)
+        return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=shuffle,
+                                           drop_last=shuffle, num_workers=0)
 
     def _fit(self, dataset, labels, epochs, batch_size, learning_rate, pbar, tag):
         model = self._build_model()
