@@ -1,0 +1,18 @@
+{
+  "config": {
+    "learning_rate": 0.001,
+    "optimizer": "adam",
+    "batch_size": 32,
+    "n_filters": 32,
+    "kernel_size": 3,
+    "dropout": 0.5,
+    "epochs": 50
+  },
+  "macro_f1": 0.8209115469152899,
+  "macro_f1_std": 0.033314455927496815,
+  "auc": 0.9059395559311287,
+  "balanced_accuracy": 0.8303227362880318,
+  "recall_lvot": 0.7376430976430977,
+  "time_min": 2.52,
+  "peak_gpu_memory_mb": 69.1
+}

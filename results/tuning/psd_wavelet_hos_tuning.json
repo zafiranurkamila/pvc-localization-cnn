@@ -1,0 +1,301 @@
+{
+  "runs": {
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.001, \"n_filters\": 64, \"optimizer\": \"adam\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "adam",
+        "batch_size": 64,
+        "n_filters": 64,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.8055674990165691,
+      "macro_f1_std": 0.03514325606158695,
+      "auc": 0.8872157309451417,
+      "balanced_accuracy": 0.8136089927080503,
+      "recall_lvot": 0.7042424242424242,
+      "time_min": 9.35,
+      "peak_gpu_memory_mb": 485.0
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.0005, \"n_filters\": 64, \"optimizer\": \"adam\"}": {
+      "config": {
+        "learning_rate": 0.0005,
+        "optimizer": "adam",
+        "batch_size": 64,
+        "n_filters": 64,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.7964970035925754,
+      "macro_f1_std": 0.019710287301813366,
+      "auc": 0.881111305862321,
+      "balanced_accuracy": 0.820929315370823,
+      "recall_lvot": 0.7486195286195285,
+      "time_min": 8.72,
+      "peak_gpu_memory_mb": 485.0
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.0001, \"n_filters\": 64, \"optimizer\": \"adam\"}": {
+      "config": {
+        "learning_rate": 0.0001,
+        "optimizer": "adam",
+        "batch_size": 64,
+        "n_filters": 64,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.7992966513341153,
+      "macro_f1_std": 0.05243457370730916,
+      "auc": 0.8810335769142175,
+      "balanced_accuracy": 0.8318923123830043,
+      "recall_lvot": 0.781952861952862,
+      "time_min": 8.86,
+      "peak_gpu_memory_mb": 485.0
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.001, \"n_filters\": 64, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 64,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.8072503225741794,
+      "macro_f1_std": 0.04321109452550104,
+      "auc": 0.8980416772748038,
+      "balanced_accuracy": 0.8159761253073136,
+      "recall_lvot": 0.7151515151515152,
+      "time_min": 8.71,
+      "peak_gpu_memory_mb": 484.1
+    },
+    "{\"batch_size\": 16, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.001, \"n_filters\": 64, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 16,
+        "n_filters": 64,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.799038534503787,
+      "macro_f1_std": 0.0664463769211342,
+      "auc": 0.9009776007734331,
+      "balanced_accuracy": 0.8087653057039403,
+      "recall_lvot": 0.6928619528619528,
+      "time_min": 9.88,
+      "peak_gpu_memory_mb": 175.0
+    },
+    "{\"batch_size\": 32, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.001, \"n_filters\": 64, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 32,
+        "n_filters": 64,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.790608413617356,
+      "macro_f1_std": 0.04892404811498132,
+      "auc": 0.8830488650131644,
+      "balanced_accuracy": 0.7960703603877587,
+      "recall_lvot": 0.6744781144781145,
+      "time_min": 9.27,
+      "peak_gpu_memory_mb": 277.4
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.001, \"n_filters\": 32, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 32,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.8171927359520289,
+      "macro_f1_std": 0.05623554269263898,
+      "auc": 0.8989245412577214,
+      "balanced_accuracy": 0.8214492778857292,
+      "recall_lvot": 0.7076767676767677,
+      "time_min": 7.93,
+      "peak_gpu_memory_mb": 310.7
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 3, \"learning_rate\": 0.001, \"n_filters\": 128, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 128,
+        "kernel_size": 3,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.8081089242654951,
+      "macro_f1_std": 0.0627375748520878,
+      "auc": 0.888876275201258,
+      "balanced_accuracy": 0.8084611301090272,
+      "recall_lvot": 0.6782491582491581,
+      "time_min": 9.17,
+      "peak_gpu_memory_mb": 857.4
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 50, \"kernel_size\": 5, \"learning_rate\": 0.001, \"n_filters\": 32, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 32,
+        "kernel_size": 5,
+        "dropout": 0.3,
+        "epochs": 50
+      },
+      "macro_f1": 0.8201648272825984,
+      "macro_f1_std": 0.061126480251217474,
+      "auc": 0.8953341208504773,
+      "balanced_accuracy": 0.833348036404805,
+      "recall_lvot": 0.741077441077441,
+      "time_min": 8.14,
+      "peak_gpu_memory_mb": 323.5
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.2, \"epochs\": 50, \"kernel_size\": 5, \"learning_rate\": 0.001, \"n_filters\": 32, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 32,
+        "kernel_size": 5,
+        "dropout": 0.2,
+        "epochs": 50
+      },
+      "macro_f1": 0.8097281607838823,
+      "macro_f1_std": 0.033687040234112564,
+      "auc": 0.8986434920465411,
+      "balanced_accuracy": 0.8122348668636878,
+      "recall_lvot": 0.6971043771043771,
+      "time_min": 8.11,
+      "peak_gpu_memory_mb": 323.5
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.5, \"epochs\": 50, \"kernel_size\": 5, \"learning_rate\": 0.001, \"n_filters\": 32, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 32,
+        "kernel_size": 5,
+        "dropout": 0.5,
+        "epochs": 50
+      },
+      "macro_f1": 0.8128400841358516,
+      "macro_f1_std": 0.04020374797240819,
+      "auc": 0.9025360321981788,
+      "balanced_accuracy": 0.8304621059286653,
+      "recall_lvot": 0.7484175084175084,
+      "time_min": 8.16,
+      "peak_gpu_memory_mb": 323.5
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 100, \"kernel_size\": 5, \"learning_rate\": 0.001, \"n_filters\": 32, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 32,
+        "kernel_size": 5,
+        "dropout": 0.3,
+        "epochs": 100
+      },
+      "macro_f1": 0.8322109998580309,
+      "macro_f1_std": 0.0583159152123235,
+      "auc": 0.9168499507705054,
+      "balanced_accuracy": 0.8251168507259059,
+      "recall_lvot": 0.6966329966329965,
+      "time_min": 15.97,
+      "peak_gpu_memory_mb": 323.5
+    },
+    "{\"batch_size\": 64, \"dropout\": 0.3, \"epochs\": 150, \"kernel_size\": 5, \"learning_rate\": 0.001, \"n_filters\": 32, \"optimizer\": \"rmsprop\"}": {
+      "config": {
+        "learning_rate": 0.001,
+        "optimizer": "rmsprop",
+        "batch_size": 64,
+        "n_filters": 32,
+        "kernel_size": 5,
+        "dropout": 0.3,
+        "epochs": 150
+      },
+      "macro_f1": 0.8309520860647691,
+      "macro_f1_std": 0.06614423185000783,
+      "auc": 0.8989170723553623,
+      "balanced_accuracy": 0.8314110615075909,
+      "recall_lvot": 0.7188552188552189,
+      "time_min": 24.01,
+      "peak_gpu_memory_mb": 323.5
+    }
+  },
+  "stages": [
+    {
+      "param": "learning_rate",
+      "chosen": 0.001,
+      "candidates": {
+        "0.001": 0.8055674990165691,
+        "0.0005": 0.7964970035925754,
+        "0.0001": 0.7992966513341153
+      }
+    },
+    {
+      "param": "optimizer",
+      "chosen": "rmsprop",
+      "candidates": {
+        "adam": 0.8055674990165691,
+        "rmsprop": 0.8072503225741794
+      }
+    },
+    {
+      "param": "batch_size",
+      "chosen": 64,
+      "candidates": {
+        "16": 0.799038534503787,
+        "32": 0.790608413617356,
+        "64": 0.8072503225741794
+      }
+    },
+    {
+      "param": "n_filters",
+      "chosen": 32,
+      "candidates": {
+        "32": 0.8171927359520289,
+        "64": 0.8072503225741794,
+        "128": 0.8081089242654951
+      }
+    },
+    {
+      "param": "kernel_size",
+      "chosen": 5,
+      "candidates": {
+        "3": 0.8171927359520289,
+        "5": 0.8201648272825984
+      }
+    },
+    {
+      "param": "dropout",
+      "chosen": 0.3,
+      "candidates": {
+        "0.2": 0.8097281607838823,
+        "0.3": 0.8201648272825984,
+        "0.5": 0.8128400841358516
+      }
+    },
+    {
+      "param": "epochs",
+      "chosen": 100,
+      "candidates": {
+        "50": 0.8201648272825984,
+        "100": 0.8322109998580309,
+        "150": 0.8309520860647691
+      }
+    }
+  ]
+}
