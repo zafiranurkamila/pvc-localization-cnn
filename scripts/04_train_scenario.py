@@ -88,7 +88,8 @@ def main():
     )
     efficiency = {
         "train_time_min": round((time.time() - start) / 60, 2),
-        "peak_gpu_memory_mb": round(torch.cuda.max_memory_allocated() / 2**20, 1) if device == "cuda" else None,
+        "peak_gpu_memory_mb": trainer.train_peak_memory_mb,
+        "inference": trainer.inference,
     }
     cv_mean, cv_std = summarize(fold_results)
 
@@ -100,8 +101,10 @@ def main():
     for key in METRIC_KEYS:
         print(f"  {key:<18} {test_metrics[key]:.4f}")
     print(f"  confusion_matrix   {test_metrics['confusion_matrix']}  (baris: RVOT, LVOT asli)")
+    inf = efficiency["inference"]
     print(f"\nWaktu training: {efficiency['train_time_min']} menit | "
-          f"Memori GPU puncak: {efficiency['peak_gpu_memory_mb']} MB")
+          f"Memori GPU puncak: {efficiency['peak_gpu_memory_mb']} MB | "
+          f"Waktu inferensi: {inf['per_beat_ms']} ms/beat ({inf['test_beats']} beat test)")
 
     result_dir = config.RESULTS_DIR / "scenarios"
     result_dir.mkdir(parents=True, exist_ok=True)

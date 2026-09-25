@@ -43,7 +43,21 @@ def main():
                         help="Skip beat segmentation (assume data/interim/beats/ exists)")
     parser.add_argument("--force", action="store_true",
                         help="Re-run all scenarios even if results exist")
+    parser.add_argument("--tuned", action="store_true",
+                        help="Final run: scenarios 1-7 with results/tuning/<s>_best.json, "
+                             "baseline with default parameters and no class weight")
     args = parser.parse_args()
+
+    def result_name(scenario: str) -> str:
+        if not args.tuned:
+            return scenario
+        return "baseline_nocw" if scenario == "baseline" else f"{scenario}_tuned"
+
+    def is_done(scenario: str) -> bool:
+        f = results_dir / f"{result_name(scenario)}_results.json"
+        if not f.exists():
+            return False
+        return not args.tuned or bool(json.loads(f.read_text()).get("efficiency", {}).get("inference"))
 
     project_root = Path(__file__).resolve().parents[1]
     results_dir = project_root / "results" / "scenarios"
@@ -56,7 +70,7 @@ def main():
     print("="*70)
     todo = []
     for scenario in scenarios:
-        done = (results_dir / f"{scenario}_results.json").exists()
+        done = is_done(scenario)
         print(f"{scenario:<20} {'SUDAH' if done else 'BELUM'}")
         if not done or args.force:
             todo.append(scenario)
@@ -99,12 +113,16 @@ def main():
         print(f"Scenario {i}/{len(todo)}: {scenario.upper()}")
         print(f"{'─'*70}")
 
-        train_args = [
-            "--scenario", scenario,
-            "--epochs", str(args.epochs),
-            "--batch-size", str(args.batch_size),
-            "--learning-rate", str(args.learning_rate)
-        ]
+        if args.tuned:
+            train_args = ["--scenario", scenario,
+                          "--no-class-weight" if scenario == "baseline" else "--tuned"]
+        else:
+            train_args = [
+                "--scenario", scenario,
+                "--epochs", str(args.epochs),
+                "--batch-size", str(args.batch_size),
+                "--learning-rate", str(args.learning_rate)
+            ]
 
         success = run_script(str(project_root / "scripts" / "04_train_scenario.py"), train_args)
         all_results[scenario] = "completed" if success else "failed"
@@ -127,7 +145,7 @@ def main():
     print(f"\nGagal: {len(failed)} | Selesai/skip: {len(scenarios) - len(failed)}/{len(scenarios)}")
     print(f"Total waktu training: {total_menit:.1f} menit ({total_menit / 60:.1f} jam)")
 
-    summary_path = results_dir / "training_summary.json"
+    summary_path = results_dir / ("training_summary_tuned.json" if args.tuned else "training_summary.json")
     with open(summary_path, "w") as f:
         json.dump({"status": all_results, "durasi_menit": durations}, f, indent=2)
     print(f"\nSummary saved: {summary_path}")
