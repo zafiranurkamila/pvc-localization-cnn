@@ -20,33 +20,34 @@ class FusionCNN(nn.Module):
         feature_types: list[str],
         num_classes: int = 2,
         hidden_dim: int = 64,
+        n_filters: int = 64,
+        kernel_size: int = None,
+        dropout: float = 0.3,
     ):
+        """kernel_size=None keeps each branch's default (5 for 1D, 3 for 2D)."""
         super().__init__()
         self.feature_types = feature_types
         self.branches = nn.ModuleDict()
-        branch_output_sizes = {}
+        kw = {"hidden": n_filters}
+        if kernel_size is not None:
+            kw["kernel_size"] = kernel_size
 
         if "psd" in feature_types:
-            self.branches["psd"] = PSDBlock(hidden=hidden_dim)
-            branch_output_sizes["psd"] = self.branches["psd"].output_size
-
+            self.branches["psd"] = PSDBlock(**kw)
         if "wavelet" in feature_types:
-            self.branches["wavelet"] = WaveletBlock(hidden=hidden_dim)
-            branch_output_sizes["wavelet"] = self.branches["wavelet"].output_size
-
+            self.branches["wavelet"] = WaveletBlock(**kw)
         if "hos" in feature_types:
-            self.branches["hos"] = HOSBlock(hidden=hidden_dim)
-            branch_output_sizes["hos"] = self.branches["hos"].output_size
+            self.branches["hos"] = HOSBlock(**kw)
 
-        total_input = sum(branch_output_sizes.values())
+        total_input = sum(branch.output_size for branch in self.branches.values())
 
         self.classifier = nn.Sequential(
             nn.Linear(total_input, hidden_dim),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(dropout),
             nn.Linear(hidden_dim, hidden_dim // 2),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(dropout),
             nn.Linear(hidden_dim // 2, num_classes),
         )
 

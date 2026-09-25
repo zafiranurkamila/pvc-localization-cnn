@@ -1,4 +1,6 @@
 """K-Fold CV training loop for CNN models."""
+import random
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -13,39 +15,52 @@ from pvc_localization.models.fusion import FusionCNN, BaselineCNN
 from pvc_localization.evaluation.metrics import compute_metrics
 
 CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "cache"
+OPTIMIZERS = {"adam": optim.Adam, "rmsprop": optim.RMSprop}
+
+
+def set_seed(seed: int = config.RANDOM_SEED):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 class CVTrainer:
-    """Patient-level K-fold CV, then a final fit on all training patients evaluated on the test set."""
+    """Patient-level K-fold CV, then (optionally) a final fit on all training patients evaluated on the test set."""
 
     def __init__(self, feature_types: list[str], num_folds: int = 5, device: str = None,
-                 class_weight: bool = True):
+                 class_weight: bool = True, optimizer: str = "adam", model_params: dict = None):
         self.feature_types = feature_types
         self.num_folds = num_folds
         self.class_weight = class_weight
+        self.optimizer_cls = OPTIMIZERS[optimizer]
+        self.model_params = model_params or {}
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
     def run(
         self,
         train_ids: list[int],
-        test_ids: list[int],
+        test_ids: list[int] = None,
         epochs: int = 10,
         batch_size: int = 32,
         learning_rate: float = 0.001,
     ) -> tuple[list[dict], dict]:
-        """Returns (fold_results, test_metrics)."""
+        """Returns (fold_results, test_metrics). With test_ids=None the test set is never loaded (tuning)."""
         train_set = PVCBeatsDataset(train_ids, self.feature_types, cache_dir=CACHE_DIR)
-        test_set = PVCBeatsDataset(test_ids, self.feature_types, cache_dir=CACHE_DIR)
+        test_set = PVCBeatsDataset(test_ids, self.feature_types, cache_dir=CACHE_DIR) if test_ids else None
 
         for ds, name in [(train_set, "train"), (test_set, "test")]:
-            for i in tqdm(range(len(ds)), desc=f"Menghitung fitur ({name})", unit="beat"):
+            if ds is None:
+                continue
+            for i in tqdm(range(len(ds)), desc=f"Menghitung fitur ({name})", unit="beat", leave=False):
                 ds[i]
 
         labels = np.array(train_set.labels())
         groups = np.array(train_set.patient_groups())
         skf = StratifiedGroupKFold(n_splits=self.num_folds, shuffle=True, random_state=config.RANDOM_SEED)
 
-        pbar = tqdm(total=(self.num_folds + 1) * epochs, desc="Training", unit="epoch")
+        n_fits = self.num_folds + (1 if test_set is not None else 0)
+        pbar = tqdm(total=n_fits * epochs, desc="Training", unit="epoch")
 
         fold_results = []
         for fold_idx, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(labels)), labels, groups)):
@@ -58,9 +73,11 @@ class CVTrainer:
             tqdm.write(f"  Fold result: macro_f1={fold_metrics['macro_f1']:.4f}, "
                        f"recall_lvot={fold_metrics['recall_lvot']:.4f}, auc={fold_metrics['auc']:.4f}\n")
 
-        tqdm.write(f"Final: train di {len(set(groups))} pasien, uji di {len(test_ids)} pasien test")
-        model = self._fit(train_set, labels, epochs, batch_size, learning_rate, pbar, "final")
-        test_metrics = self._evaluate(model, self._loader(test_set, batch_size, False))
+        test_metrics = None
+        if test_set is not None:
+            tqdm.write(f"Final: train di {len(set(groups))} pasien, uji di {len(test_ids)} pasien test")
+            model = self._fit(train_set, labels, epochs, batch_size, learning_rate, pbar, "final")
+            test_metrics = self._evaluate(model, self._loader(test_set, batch_size, False))
         pbar.close()
 
         return fold_results, test_metrics
@@ -71,7 +88,7 @@ class CVTrainer:
 
     def _fit(self, dataset, labels, epochs, batch_size, learning_rate, pbar, tag):
         model = self._build_model()
-        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+        optimizer = self.optimizer_cls(model.parameters(), lr=learning_rate)
         class_weights = None
         if self.class_weight:
             counts = np.bincount(labels, minlength=2)
@@ -88,7 +105,7 @@ class CVTrainer:
         return model
 
     def _build_model(self):
-        model = BaselineCNN() if not self.feature_types else FusionCNN(self.feature_types)
+        model = BaselineCNN() if not self.feature_types else FusionCNN(self.feature_types, **self.model_params)
         return model.to(self.device)
 
     def _forward(self, model, batch_device):
