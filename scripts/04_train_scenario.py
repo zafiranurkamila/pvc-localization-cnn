@@ -46,7 +46,10 @@ def main():
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--learning-rate", type=float, default=0.001)
+    parser.add_argument("--no-class-weight", action="store_true",
+                        help="Train without class weights (baseline as defined in the proposal)")
     args = parser.parse_args()
+    use_class_weight = not args.no_class_weight
 
     set_seed(config.RANDOM_SEED)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -55,12 +58,13 @@ def main():
     feature_types = config.FEATURE_SCENARIOS[args.scenario]
     print(f"\nScenario: {args.scenario}")
     print(f"Features: {feature_types if feature_types else 'baseline (raw 12-lead beat)'}")
+    print(f"Class weight: {'balanced' if use_class_weight else 'none'}")
 
     train_ids, test_ids = create_train_val_test_split()
     print(f"\nTrain patients: {len(train_ids)}")
     print(f"Test patients: {len(test_ids)}")
 
-    trainer = CVTrainer(feature_types, num_folds=config.N_FOLDS, device=device)
+    trainer = CVTrainer(feature_types, num_folds=config.N_FOLDS, device=device, class_weight=use_class_weight)
     fold_results, test_metrics = trainer.run(
         train_ids, test_ids,
         epochs=args.epochs,
@@ -80,14 +84,15 @@ def main():
 
     result_dir = config.RESULTS_DIR / "scenarios"
     result_dir.mkdir(parents=True, exist_ok=True)
-    result_file = result_dir / f"{args.scenario}_results.json"
+    suffix = "" if use_class_weight else "_nocw"
+    result_file = result_dir / f"{args.scenario}{suffix}_results.json"
     with open(result_file, "w") as f:
         json.dump({
             "scenario": args.scenario,
             "features": feature_types,
             "config": {"epochs": args.epochs, "batch_size": args.batch_size,
                        "learning_rate": args.learning_rate, "n_folds": config.N_FOLDS,
-                       "cv": "StratifiedGroupKFold per pasien", "class_weight": "balanced",
+                       "cv": "StratifiedGroupKFold per pasien", "class_weight": "balanced" if use_class_weight else "none",
                        "seed": config.RANDOM_SEED},
             "cv_mean": cv_mean,
             "cv_std": cv_std,

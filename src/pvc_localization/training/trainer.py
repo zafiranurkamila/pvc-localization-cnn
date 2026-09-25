@@ -18,9 +18,11 @@ CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "cache"
 class CVTrainer:
     """Patient-level K-fold CV, then a final fit on all training patients evaluated on the test set."""
 
-    def __init__(self, feature_types: list[str], num_folds: int = 5, device: str = None):
+    def __init__(self, feature_types: list[str], num_folds: int = 5, device: str = None,
+                 class_weight: bool = True):
         self.feature_types = feature_types
         self.num_folds = num_folds
+        self.class_weight = class_weight
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
     def run(
@@ -70,8 +72,10 @@ class CVTrainer:
     def _fit(self, dataset, labels, epochs, batch_size, learning_rate, pbar, tag):
         model = self._build_model()
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-        counts = np.bincount(labels, minlength=2)
-        class_weights = torch.tensor(len(labels) / (2 * np.maximum(counts, 1)), dtype=torch.float32, device=self.device)
+        class_weights = None
+        if self.class_weight:
+            counts = np.bincount(labels, minlength=2)
+            class_weights = torch.tensor(len(labels) / (2 * np.maximum(counts, 1)), dtype=torch.float32, device=self.device)
         criterion = nn.CrossEntropyLoss(weight=class_weights)
         loader = self._loader(dataset, batch_size, True)
 
