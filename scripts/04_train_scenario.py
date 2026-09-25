@@ -8,6 +8,7 @@ Usage:
 Output: results/scenarios/<scenario>[_nocw|_tuned]_results.json
 """
 import argparse
+import csv
 import json
 import sys
 import time
@@ -109,7 +110,27 @@ def main():
     result_dir = config.RESULTS_DIR / "scenarios"
     result_dir.mkdir(parents=True, exist_ok=True)
     suffix = ("" if use_class_weight else "_nocw") + ("_tuned" if args.tuned else "")
-    result_file = result_dir / f"{args.scenario}{suffix}_results.json"
+    name = f"{args.scenario}{suffix}"
+    result_file = result_dir / f"{name}_results.json"
+
+    model_dir = config.RESULTS_DIR / "models"
+    model_dir.mkdir(parents=True, exist_ok=True)
+    model_file = model_dir / f"{name}.pt"
+    torch.save({"state_dict": trainer.final_model.state_dict(), "scenario": args.scenario,
+                "features": feature_types, "hyperparameters": hp,
+                "class_weight": use_class_weight}, model_file)
+
+    pred_dir = config.RESULTS_DIR / "predictions"
+    pred_dir.mkdir(parents=True, exist_ok=True)
+    pred_file = pred_dir / f"{name}_test_predictions.csv"
+    p = trainer.test_predictions
+    with open(pred_file, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["hospital_id", "beat_idx", "label", "prob_lvot", "pred"])
+        writer.writerows(zip(p["hospital_id"], p["beat_idx"], p["label"],
+                             [round(x, 6) for x in p["prob_lvot"]], p["pred"]))
+    print(f"Model saved to {model_file}")
+    print(f"Test predictions saved to {pred_file}")
     with open(result_file, "w") as f:
         json.dump({
             "scenario": args.scenario,

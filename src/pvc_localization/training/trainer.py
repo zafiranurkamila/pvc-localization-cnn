@@ -38,6 +38,8 @@ class CVTrainer:
         self.model_params = model_params or {}
         self.inference = None
         self.train_peak_memory_mb = None
+        self.final_model = None
+        self.test_predictions = None
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
     def run(
@@ -81,7 +83,10 @@ class CVTrainer:
             tqdm.write(f"Final: train di {len(set(groups))} pasien, uji di {len(test_ids)} pasien test")
             model = self._fit(train_set, labels, epochs, batch_size, learning_rate, pbar, "final")
             test_loader = self._loader(test_set, batch_size, False)
-            test_metrics = self._evaluate(model, test_loader)
+            self.test_predictions = self._predict(model, test_loader)
+            p = self.test_predictions
+            test_metrics = compute_metrics(p["label"], p["pred"], p["prob_lvot"])
+            self.final_model = model
             if self.device == "cuda":
                 self.train_peak_memory_mb = round(torch.cuda.max_memory_allocated() / 2**20, 1)
             self.inference = self._measure_inference(model, test_loader)
@@ -154,14 +159,20 @@ class CVTrainer:
             total_loss += loss.item()
         return total_loss / len(loader)
 
-    def _evaluate(self, model, loader):
+    def _predict(self, model, loader) -> dict:
         model.eval()
-        predictions, targets, scores = [], [], []
+        out = {"hospital_id": [], "beat_idx": [], "label": [], "prob_lvot": [], "pred": []}
         with torch.no_grad():
             for batch in loader:
                 batch_device = self._to_device(batch)
                 probs = torch.softmax(self._forward(model, batch_device), dim=1)
-                predictions.extend(probs.argmax(dim=1).cpu().numpy())
-                scores.extend(probs[:, 1].cpu().numpy())
-                targets.extend(batch_device["label"].cpu().numpy())
-        return compute_metrics(targets, predictions, scores)
+                out["pred"].extend(probs.argmax(dim=1).cpu().tolist())
+                out["prob_lvot"].extend(probs[:, 1].cpu().tolist())
+                out["label"].extend(batch_device["label"].cpu().tolist())
+                out["hospital_id"].extend(batch["hospital_id"].tolist())
+                out["beat_idx"].extend(batch["beat_idx"].tolist())
+        return out
+
+    def _evaluate(self, model, loader):
+        p = self._predict(model, loader)
+        return compute_metrics(p["label"], p["pred"], p["prob_lvot"])

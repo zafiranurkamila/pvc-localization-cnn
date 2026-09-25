@@ -95,6 +95,7 @@ class PVCBeatsDataset(Dataset):
 
         return {
             "hospital_id": hospital_id,
+            "beat_idx": beat_idx,
             "label": label_int,
             **features,
         }
