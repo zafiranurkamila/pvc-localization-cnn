@@ -1,0 +1,20 @@
+{
+  "baseline_auc": 0.9057495508163425,
+  "baseline_macro_f1": 0.8013058651356524,
+  "branches": [
+    {
+      "branch": "psd",
+      "auc_drop_mean": 0.32206858839153185,
+      "auc_drop_std": 0.03743060732126315,
+      "macro_f1_drop_mean": 0.2301098785494976,
+      "macro_f1_drop_std": 0.027827763273724715
+    },
+    {
+      "branch": "hos",
+      "auc_drop_mean": 0.031345207405671406,
+      "auc_drop_std": 0.010445209083581595,
+      "macro_f1_drop_mean": 0.0822568254346226,
+      "macro_f1_drop_std": 0.023968618835166045
+    }
+  ]
+}

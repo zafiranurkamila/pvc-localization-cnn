@@ -1,0 +1,27 @@
+{
+  "baseline_auc": 0.9580892117803296,
+  "baseline_macro_f1": 0.8644393241167434,
+  "branches": [
+    {
+      "branch": "psd",
+      "auc_drop_mean": 0.09034320235398269,
+      "auc_drop_std": 0.017657058262075413,
+      "macro_f1_drop_mean": 0.0785796499369394,
+      "macro_f1_drop_std": 0.015106168704089118
+    },
+    {
+      "branch": "wavelet",
+      "auc_drop_mean": 0.20372366742181594,
+      "auc_drop_std": 0.017191858276306,
+      "macro_f1_drop_mean": 0.2128545236271989,
+      "macro_f1_drop_std": 0.01916812130812246
+    },
+    {
+      "branch": "hos",
+      "auc_drop_mean": 0.013303648152488004,
+      "auc_drop_std": 0.008788888584605971,
+      "macro_f1_drop_mean": 0.013810797791201443,
+      "macro_f1_drop_std": 0.015397208423895746
+    }
+  ]
+}

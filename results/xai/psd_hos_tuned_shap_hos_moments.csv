@@ -1,0 +1,4 @@
+moment,mean_abs_shap
+skewness,0.419148
+kurtosis,0.112801
+bispectrum_mean_per_bin,0.128462
