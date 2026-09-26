@@ -2,7 +2,6 @@ data/raw/
 data/processed/
 data/interim/
 data/cache/
-results/models/
 results/figures/
 results/metrics/
 
