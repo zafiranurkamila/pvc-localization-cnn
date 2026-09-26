@@ -128,7 +128,7 @@ def main():
         writer = csv.writer(f)
         writer.writerow(["hospital_id", "beat_idx", "label", "prob_lvot", "pred"])
         writer.writerows(zip(p["hospital_id"], p["beat_idx"], p["label"],
-                             [round(x, 6) for x in p["prob_lvot"]], p["pred"]))
+                             [repr(float(x)) for x in p["prob_lvot"]], p["pred"]))
     print(f"Model saved to {model_file}")
     print(f"Test predictions saved to {pred_file}")
     with open(result_file, "w") as f:
