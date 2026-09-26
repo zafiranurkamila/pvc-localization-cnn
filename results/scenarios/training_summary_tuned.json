@@ -1,0 +1,22 @@
+{
+  "status": {
+    "baseline": "completed",
+    "psd": "completed",
+    "wavelet": "completed",
+    "hos": "completed",
+    "psd_wavelet": "completed",
+    "psd_hos": "completed",
+    "wavelet_hos": "completed",
+    "psd_wavelet_hos": "completed"
+  },
+  "durasi_menit": {
+    "baseline": 1.5,
+    "psd": 3.3,
+    "wavelet": 9.8,
+    "hos": 9.3,
+    "psd_wavelet": 11.0,
+    "psd_hos": 12.8,
+    "wavelet_hos": 10.2,
+    "psd_wavelet_hos": 21.8
+  }
+}
