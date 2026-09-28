@@ -7,10 +7,15 @@
     "epochs": 50,
     "batch_size": 64,
     "learning_rate": 0.001,
+    "optimizer": "adam",
+    "n_filters": 64,
+    "kernel_size": null,
+    "dropout": 0.3,
     "n_folds": 5,
     "cv": "StratifiedGroupKFold per pasien",
     "class_weight": "balanced",
-    "seed": 42
+    "seed": 42,
+    "tuned": false
   },
   "cv_mean": {
     "accuracy": 0.8649048943688445,
@@ -169,5 +174,14 @@
         97
       ]
     ]
+  },
+  "efficiency": {
+    "train_time_min": 2.97,
+    "peak_gpu_memory_mb": 85.6,
+    "inference": {
+      "test_beats": 353,
+      "total_s": 0.0062,
+      "per_beat_ms": 0.0177
+    }
   }
 }
