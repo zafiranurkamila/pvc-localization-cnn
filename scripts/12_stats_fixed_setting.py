@@ -47,7 +47,7 @@ def main():
     samples = [np.concatenate([idx[p] for p in rng.choice(pids, len(pids))]) for _ in range(B)]
 
     f1 = lambda s, i: f1_score(y[i], D[s].pred.values[i], average="macro")
-    auc = lambda s, i: roc_auc_score(y[i], D[s].logit_margin.values[i])
+    auc = lambda s, i: roc_auc_score(y[i], D[s].prob_lvot.values[i])
     full = np.arange(len(y))
     boot = {s: (np.array([f1(s, i) for i in samples]), np.array([auc(s, i) for i in samples])) for s, _ in SCEN}
 
