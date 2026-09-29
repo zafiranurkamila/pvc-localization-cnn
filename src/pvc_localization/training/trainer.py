@@ -30,9 +30,11 @@ class CVTrainer:
     """Patient-level K-fold CV, then (optionally) a final fit on all training patients evaluated on the test set."""
 
     def __init__(self, feature_types: list[str], num_folds: int = 5, device: str = None,
-                 class_weight: bool = True, optimizer: str = "adam", model_params: dict = None):
+                 class_weight: bool = True, optimizer: str = "adam", model_params: dict = None,
+                 cv_seed: int = config.RANDOM_SEED):
         self.feature_types = feature_types
         self.num_folds = num_folds
+        self.cv_seed = cv_seed
         self.class_weight = class_weight
         self.optimizer_cls = OPTIMIZERS[optimizer]
         self.model_params = model_params or {}
@@ -62,7 +64,7 @@ class CVTrainer:
 
         labels = np.array(train_set.labels())
         groups = np.array(train_set.patient_groups())
-        skf = StratifiedGroupKFold(n_splits=self.num_folds, shuffle=True, random_state=config.RANDOM_SEED)
+        skf = StratifiedGroupKFold(n_splits=self.num_folds, shuffle=True, random_state=self.cv_seed)
 
         n_fits = self.num_folds + (1 if test_set is not None else 0)
         pbar = tqdm(total=n_fits * epochs, desc="Training", unit="epoch")
