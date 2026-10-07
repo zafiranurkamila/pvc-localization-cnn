@@ -72,24 +72,33 @@ class FusionCNN(nn.Module):
 
 
 class BaselineCNN(nn.Module):
-    """1D CNN on the raw 12-lead beat, without hand-crafted features."""
+    """1D CNN on the raw 12-lead beat, without hand-crafted features.
 
-    def __init__(self, n_leads: int = 12, num_classes: int = 2, hidden_dim: int = 64):
+    The defaults (n_filters=64, kernel_size=None, dropout=0.3) give the original fixed architecture:
+    32/64/64 filters with kernels 7/7/5. They are exposed so the baseline can be tuned with the same
+    budget as the feature models (reviewer comment 6): kernel_size k gives kernels k/k/max(k-2, 3).
+    """
+
+    def __init__(self, n_leads: int = 12, num_classes: int = 2, hidden_dim: int = 64,
+                 n_filters: int = 64, kernel_size: int = None, dropout: float = 0.3):
         super().__init__()
+        k1 = 7 if kernel_size is None else kernel_size
+        k3 = 5 if kernel_size is None else max(kernel_size - 2, 3)
+        f = n_filters
         self.net = nn.Sequential(
-            nn.Conv1d(n_leads, 32, kernel_size=7, padding=3),
+            nn.Conv1d(n_leads, f // 2, kernel_size=k1, padding=k1 // 2),
             nn.ReLU(),
             nn.MaxPool1d(4),
-            nn.Conv1d(32, hidden_dim, kernel_size=7, padding=3),
+            nn.Conv1d(f // 2, f, kernel_size=k1, padding=k1 // 2),
             nn.ReLU(),
             nn.MaxPool1d(4),
-            nn.Conv1d(hidden_dim, hidden_dim, kernel_size=5, padding=2),
+            nn.Conv1d(f, f, kernel_size=k3, padding=k3 // 2),
             nn.ReLU(),
             nn.AdaptiveAvgPool1d(16),
             nn.Flatten(),
-            nn.Linear(hidden_dim * 16, hidden_dim),
+            nn.Linear(f * 16, hidden_dim),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(dropout),
             nn.Linear(hidden_dim, num_classes),
         )
 

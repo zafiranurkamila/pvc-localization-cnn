@@ -11,6 +11,7 @@ then train the final model with:  python scripts/04_train_scenario.py --scenario
 Usage:
     python scripts/08_tune_scenarios.py                       # all 7 feature scenarios
     python scripts/08_tune_scenarios.py --scenarios psd_wavelet psd
+    python scripts/08_tune_scenarios.py --scenarios baseline     # raw-signal CNN, same budget
 """
 import argparse
 import json
@@ -42,6 +43,18 @@ STAGES = [
 ]
 
 FEATURE_SCENARIOS = [s for s, feats in config.FEATURE_SCENARIOS.items() if feats]
+ALL_SCENARIOS = list(config.FEATURE_SCENARIOS)
+
+
+def start_and_stages(scenario: str):
+    """The raw-signal baseline gets the same stages and number of candidates (reviewer comment 6),
+    but its kernel candidates are 7 and 5 (kernels 7/7/5 and 5/5/3) because it convolves the
+    1600-sample raw beat; 7 is its untuned default."""
+    if scenario != "baseline":
+        return START_CONFIG, STAGES
+    start = {**START_CONFIG, "kernel_size": 7}
+    stages = [(p, [7, 5] if p == "kernel_size" else v) for p, v in STAGES]
+    return start, stages
 
 
 def key_of(cfg: dict) -> str:
@@ -75,16 +88,17 @@ def evaluate(scenario: str, cfg: dict, train_ids: list[int]) -> dict:
 def tune(scenario: str, train_ids: list[int], out_dir: Path):
     log_file = out_dir / f"{scenario}_tuning.json"
     log = json.loads(log_file.read_text()) if log_file.exists() else {"runs": {}, "stages": []}
-    best = dict(START_CONFIG)
+    start, stages = start_and_stages(scenario)
+    best = dict(start)
     log["stages"] = []
 
-    for stage_idx, (param, values) in enumerate(STAGES, 1):
+    for stage_idx, (param, values) in enumerate(stages, 1):
         candidates = []
         for value in values:
             cfg = {**best, param: value}
             k = key_of(cfg)
             if k not in log["runs"]:
-                print(f"\n[{scenario}] Tahap {stage_idx}/{len(STAGES)} {param}={value}  config={cfg}")
+                print(f"\n[{scenario}] Tahap {stage_idx}/{len(stages)} {param}={value}  config={cfg}")
                 log["runs"][k] = evaluate(scenario, cfg, train_ids)
                 log_file.write_text(json.dumps(log, indent=2))
             r = log["runs"][k]
@@ -106,7 +120,8 @@ def tune(scenario: str, train_ids: list[int], out_dir: Path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scenarios", nargs="+", choices=FEATURE_SCENARIOS, default=FEATURE_SCENARIOS)
+    parser.add_argument("--scenarios", nargs="+", choices=ALL_SCENARIOS, default=FEATURE_SCENARIOS,
+                        help="default: the 7 feature scenarios; add 'baseline' to tune the raw-signal CNN")
     args = parser.parse_args()
 
     out_dir = config.RESULTS_DIR / "tuning"

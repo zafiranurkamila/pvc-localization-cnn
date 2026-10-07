@@ -138,7 +138,8 @@ class CVTrainer:
         return model
 
     def _build_model(self):
-        model = BaselineCNN() if not self.feature_types else FusionCNN(self.feature_types, **self.model_params)
+        model = (BaselineCNN(**self.model_params) if not self.feature_types
+                 else FusionCNN(self.feature_types, **self.model_params))
         return model.to(self.device)
 
     def _forward(self, model, batch_device):
