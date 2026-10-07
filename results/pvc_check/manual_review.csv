@@ -1,31 +1,31 @@
 hospital_id,label,split,r_peaks,flagged_pvc,flagged_ids,correct_pvc,false_pvc,missed_pvc,notes
-740262,RVOT,train,15,9,1 4 5 8 9 11 12 14 15,,,,
-744192,RVOT,train,20,5,6 9 12 15 20,,,,
-762912,LVOT,train,13,6,1 4 6 7 8 12,,,,
-777461,LVOT,train,11,1,7,,,,
-778725,RVOT,train,10,3,2 6 10,,,,
-786873,LVOT,train,9,4,2 4 6 8,,,,
-787045,LVOT,train,9,3,2 5 8,,,,
-793530,LVOT,train,9,3,1 5 9,,,,
-822228,LVOT,train,13,7,1 3 5 7 9 11 13,,,,
-851601,RVOT,train,21,10,3 5 6 8 9 11 12 15 18 21,,,,
-866682,LVOT,train,12,4,6 8 10 12,,,,
-879425,LVOT,train,3,1,2,,,,
-880464,LVOT,train,12,5,2 5 7 9 11,,,,
-885118,RVOT,train,15,6,1 4 5 8 11 14,,,,
-901632,LVOT,train,18,2,5 9,,,,
-909279,RVOT,train,15,1,12,,,,
-916739,LVOT,train,16,8,2 4 6 8 10 12 14 16,,,,
-946273,RVOT,train,10,2,1 5,,,,
-958132,RVOT,train,9,3,4 7 9,,,,
-964638,LVOT,train,34,14,3 5 8 11 13 15 17 19 21 23 26 29 31 33,,,,
-966796,RVOT,train,26,5,1 7 17 23 25,,,,
-970087,RVOT,train,22,8,4 5 8 9 13 14 18 21,,,,
-982506,RVOT,train,6,3,1 4 6,,,,
-988990,RVOT,train,12,1,3,,,,
-990201,LVOT,train,10,5,1 3 5 7 9,,,,
-990964,LVOT,train,19,7,2 4 11 13 14 15 18,,,,
-1010240,RVOT,test,26,2,5 15,,,,
-1015313,LVOT,train,4,1,3,,,,
-1015792,RVOT,train,18,5,1 5 9 13 17,,,,
-1023765,RVOT,train,22,4,1 6 11 21,,,,
+740262,RVOT,train,15,9,1 4 5 8 9 11 12 14 15,9.0,0.0,0.0,couplets; all flagged beats wide; PVC at 0.25 s too close to start (not extractable)
+744192,RVOT,train,20,5,6 9 12 15 20,5.0,0.0,0.0,trigeminy; beat 20 at end of recording; beat 16 is a spurious detection labelled non-PVC
+762912,LVOT,train,13,6,1 4 6 7 8 12,6.0,0.0,0.0,"includes a triplet (6-8); beat 9 (52 ms) possibly fusion, left as non-PVC"
+777461,LVOT,train,11,1,7,1.0,0.0,0.0,
+778725,RVOT,train,10,3,2 6 10,3.0,0.0,0.0,
+786873,LVOT,train,9,4,2 4 6 8,4.0,0.0,0.0,PVC at 0.2 s before the first detected peak (not extractable)
+787045,LVOT,train,9,3,2 5 8,3.0,0.0,0.0,
+793530,LVOT,train,9,3,1 5 9,3.0,0.0,0.0,
+822228,LVOT,train,13,7,1 3 5 7 9 11 13,7.0,0.0,0.0,bigeminy
+851601,RVOT,train,21,10,3 5 6 8 9 11 12 15 18 21,7.0,3.0,0.0,"beats 5, 8, 11 are low-amplitude narrow beats just before a PVC, width overestimated -> false PVC"
+866682,LVOT,train,12,4,6 8 10 12,4.0,0.0,0.0,beat 12 at end of recording
+879425,LVOT,train,3,1,2,1.0,0.0,0.0,PVC at 0.25 s not detected (not extractable)
+880464,LVOT,train,12,5,2 5 7 9 11,5.0,0.0,0.0,PVC at 0.25 s not detected (not extractable)
+885118,RVOT,train,15,6,1 4 5 8 11 14,5.0,1.0,0.0,beat 5 is a narrow beat on the ST segment of PVC 4 -> false PVC
+901632,LVOT,train,18,2,5 9,2.0,0.0,0.0,
+909279,RVOT,train,15,1,12,1.0,0.0,6.0,"bigeminy with wide beats 2,4,6,8,10,14 (80-84 ms) left in the narrow group because beat 12 (218 ms) is an outlier; beat 12 itself uncertain (very large amplitude)"
+916739,LVOT,train,16,8,2 4 6 8 10 12 14 16,8.0,0.0,0.0,bigeminy; first PVC not detected (not extractable); beat 16 at end
+946273,RVOT,train,10,2,1 5,2.0,0.0,0.0,
+958132,RVOT,train,9,3,4 7 9,3.0,0.0,0.0,
+964638,LVOT,train,34,14,3 5 8 11 13 15 17 19 21 23 26 29 31 33,13.0,1.0,0.0,"beat 31 (136 ms) is a low-amplitude deflection, not a PVC"
+966796,RVOT,train,26,5,1 7 17 23 25,5.0,0.0,0.0,
+970087,RVOT,train,22,8,4 5 8 9 13 14 18 21,3.0,5.0,3.0,"noisy recording; R peaks detected on narrow spikes next to the PVCs, windows misaligned (beats 5, 8, 9, 13, 18); about 3 PVC peaks not detected"
+982506,RVOT,train,6,3,1 4 6,3.0,0.0,0.0,beat 6 at end of recording
+988990,RVOT,train,12,1,3,1.0,0.0,3.0,"wide beats 1, 5, 11 (96-134 ms) left in the narrow group because beat 3 (178 ms) is an outlier"
+990201,LVOT,train,10,5,1 3 5 7 9,5.0,0.0,0.0,
+990964,LVOT,train,19,7,2 4 11 13 14 15 18,7.0,0.0,0.0,includes a triplet (13-15); first PVC at edge not extractable
+1010240,RVOT,test,26,2,5 15,2.0,0.0,0.0,
+1015313,LVOT,train,4,1,3,1.0,0.0,0.0,
+1015792,RVOT,train,18,5,1 5 9 13 17,5.0,0.0,0.0,
+1023765,RVOT,train,22,4,1 6 11 21,4.0,0.0,0.0,

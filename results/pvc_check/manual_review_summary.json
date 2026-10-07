@@ -1,0 +1,22 @@
+{
+ "patients_reviewed": 30,
+ "by_class": {
+  "RVOT": 15,
+  "LVOT": 15
+ },
+ "true_pvc_flagged": 128,
+ "false_pvc_flagged": 10,
+ "missed_pvc": 12,
+ "precision": 0.927536231884058,
+ "precision_ci95": [
+  0.8717477659879114,
+  0.9601661436126572
+ ],
+ "sensitivity": 0.9142857142857143,
+ "sensitivity_ci95": [
+  0.8561533945064643,
+  0.9502892479557998
+ ],
+ "patients_without_any_error": 24,
+ "patients_with_at_least_one_correct_pvc": 30
+}
