@@ -1,0 +1,20 @@
+{
+ "n_patients": 329,
+ "n_with_narrow_and_wide_beats": 329,
+ "narrow_width_ms_median": 28.0,
+ "wide_width_ms_median": 107.75,
+ "gap_ms_median": 66.5,
+ "gap_ms_q1": 52.5,
+ "patients_gap_below_10ms": 1,
+ "patients_without_flagged_pvc": 0,
+ "template_check_patients": 290,
+ "pvc_closer_to_pvc_template_mean_fraction": 0.9790428756503807,
+ "patients_all_pvc_closer_to_pvc_template": 269,
+ "median_r_pvc_template": 0.9970711514253681,
+ "median_r_normal_template": 0.6801967127304333,
+ "manual_sample": {
+  "n_patients": 30,
+  "n_per_class": 15,
+  "seed": 42
+ }
+}
