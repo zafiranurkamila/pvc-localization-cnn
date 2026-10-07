@@ -1,0 +1,53 @@
+{
+ "environment": {
+  "cpu": "AMD64 Family 23 Model 113 Stepping 0, AuthenticAMD",
+  "os": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.0",
+  "torch": "2.12.0.dev20260408+cu128",
+  "cuda": "12.8",
+  "cudnn": 92000,
+  "gpu": "NVIDIA GeForce RTX 5060 Ti",
+  "cpu_threads": 6,
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "sklearn": "1.9.1",
+  "pywt": "1.8.0",
+  "shap": "0.52.0",
+  "neurokit2": "0.2.13"
+ },
+ "n_beats_in_recording": 9,
+ "per_recording_ms": {
+  "filtering_10s": 11.220550048165023,
+  "pvc_beat_extraction_10s": 2.7500000433064997
+ },
+ "per_beat_cpu_ms": {
+  "zscore": 0.06400002166628838,
+  "psd": 0.9194999583996832,
+  "cwt": 177.73060000035912,
+  "hos": 10.155349969863892
+ },
+ "cnn_forward_ms_batch1": {
+  "cpu": {
+   "baseline": 0.5184499896131456,
+   "psd_wavelet": 2.9901000089012086,
+   "psd_wavelet_hos": 3.411150013562292
+  },
+  "cuda": {
+   "baseline": 0.662549922708422,
+   "psd_wavelet": 1.0982000385411084,
+   "psd_wavelet_hos": 1.4913500053808093
+  }
+ },
+ "end_to_end_per_beat_ms": {
+  "cpu": {
+   "baseline": 0.582450011279434,
+   "psd_wavelet": 181.7041999893263,
+   "psd_wavelet_hos": 192.28059996385127
+  },
+  "cuda": {
+   "baseline": 0.7265499443747103,
+   "psd_wavelet": 179.8123000189662,
+   "psd_wavelet_hos": 190.3607999556698
+  }
+ }
+}

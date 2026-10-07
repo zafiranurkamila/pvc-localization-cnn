@@ -1,0 +1,105 @@
+{
+ "all": {
+  "n_patients": 329,
+  "total_beats": 1767,
+  "median": 4.0,
+  "q1": 2.0,
+  "q3": 6.0,
+  "min": 1,
+  "max": 35,
+  "zero_beat_patients": 0
+ },
+ "by_class": {
+  "LVOT": {
+   "n_patients": 75,
+   "total_beats": 373,
+   "median": 4.0,
+   "q1": 3.0,
+   "q3": 6.0,
+   "min": 1,
+   "max": 34,
+   "zero_beat_patients": 0
+  },
+  "RVOT": {
+   "n_patients": 254,
+   "total_beats": 1394,
+   "median": 4.0,
+   "q1": 2.0,
+   "q3": 7.0,
+   "min": 1,
+   "max": 35,
+   "zero_beat_patients": 0
+  }
+ },
+ "by_split": {
+  "test": {
+   "n_patients": 66,
+   "total_beats": 353,
+   "median": 4.0,
+   "q1": 2.25,
+   "q3": 6.75,
+   "min": 1,
+   "max": 34,
+   "zero_beat_patients": 0
+  },
+  "train": {
+   "n_patients": 263,
+   "total_beats": 1414,
+   "median": 4.0,
+   "q1": 2.0,
+   "q3": 6.0,
+   "min": 1,
+   "max": 35,
+   "zero_beat_patients": 0
+  }
+ },
+ "by_split_class": {
+  "test_LVOT": {
+   "n_patients": 15,
+   "total_beats": 102,
+   "median": 4.0,
+   "q1": 2.5,
+   "q3": 5.5,
+   "min": 1,
+   "max": 34,
+   "zero_beat_patients": 0
+  },
+  "test_RVOT": {
+   "n_patients": 51,
+   "total_beats": 251,
+   "median": 4.0,
+   "q1": 2.5,
+   "q3": 7.0,
+   "min": 1,
+   "max": 16,
+   "zero_beat_patients": 0
+  },
+  "train_LVOT": {
+   "n_patients": 60,
+   "total_beats": 271,
+   "median": 4.0,
+   "q1": 3.0,
+   "q3": 6.0,
+   "min": 1,
+   "max": 18,
+   "zero_beat_patients": 0
+  },
+  "train_RVOT": {
+   "n_patients": 203,
+   "total_beats": 1143,
+   "median": 4.0,
+   "q1": 2.0,
+   "q3": 6.5,
+   "min": 1,
+   "max": 35,
+   "zero_beat_patients": 0
+  }
+ },
+ "recording_duration_s": {
+  "median": 11.6,
+  "min": 2.9,
+  "max": 59.32
+ },
+ "fraction_of_r_peaks_flagged_wide": 0.28440800882863,
+ "wide_beats_dropped_at_recording_edges": 37
+}
