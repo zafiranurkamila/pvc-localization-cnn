@@ -188,13 +188,16 @@ def run(feats, pid, labels, patients, clinical, device, n_outer, quick, ensemble
         tr_pat, te_pat = all_p[tr_p], all_p[te_p]
         inner = list(StratifiedKFold(n_splits=3, shuffle=True, random_state=SEED + fo)
                      .split(tr_pat, patients[tr_pat].to_numpy()))
+        # progress in epochs; the total grows once the epochs of the chosen setting are known
+        bar = tqdm(total=len(inner) * len(grid) * max(ckpts), desc=f"outer {fo + 1}/5", unit="epoch", leave=False)
         # 1) CNN setting: as script 21, one seed per inner fold and setting
+        bar.set_postfix_str("1/3 inner grid")
         oof = {}
         for itr, iva in inner:
             b_tr = np.where(np.isin(pid, tr_pat[itr]))[0]; b_va = np.where(np.isin(pid, tr_pat[iva]))[0]
             for hp in grid:
                 _, snaps = n21.train(feats, b_tr, labels, "pvc", hp["learning_rate"], hp["dropout"], max(ckpts),
-                                     device, eval_sets=[b_va], checkpoints=ckpts)
+                                     device, eval_sets=[b_va], checkpoints=ckpts, progress=bar)
                 for ep, (m_va,) in snaps.items():
                     oof.setdefault((hp["learning_rate"], hp["dropout"], ep), []).append(
                         n21.patient_scores(m_va, pid[b_va]))
@@ -205,13 +208,17 @@ def run(feats, pid, labels, patients, clinical, device, n_outer, quick, ensemble
             if c > best_c:
                 best, best_c = key, c
         lr, dropout, ep = best
+        bar.total += (len(inner) * (ensemble - 1) + ensemble) * ep
+        bar.refresh()
         # 2) inner out-of-fold scores of a K-seed ensemble with the chosen setting; seed SEED is the grid run above
         #    (its snapshot at epoch ep equals a run of ep epochs: same seed, constant learning rate)
+        bar.set_postfix_str("2/3 inner ensemble")
         ens_parts = []
         for (itr, iva), seed0 in zip(inner, oof[best]):
             b_tr = np.where(np.isin(pid, tr_pat[itr]))[0]; b_va = np.where(np.isin(pid, tr_pat[iva]))[0]
             extra = [n21.patient_scores(n21.margins(n21.train(feats, b_tr, labels, "pvc", lr, dropout, ep, device,
-                                                              seed=SEED + k)[0], feats, b_va, "pvc"), pid[b_va])
+                                                              seed=SEED + k, progress=bar)[0], feats, b_va, "pvc"),
+                                        pid[b_va])
                      for k in range(1, ensemble)]
             ens_parts.append(pd.concat([seed0] + extra, axis=1).mean(axis=1))
         cnn_tr = pd.concat(ens_parts)
@@ -225,9 +232,11 @@ def run(feats, pid, labels, patients, clinical, device, n_outer, quick, ensemble
         X_st_tr = np.column_stack([cnn_tr.to_numpy(), X_clin_tr])
         st_model, c_st, auc_st, thr_st = fit_logistic(X_st_tr, y_tr, cv)
         # 3) outer fit with K seeds; predict the outer test fold once
+        bar.set_postfix_str("3/3 outer ensemble")
         b_tr = np.where(np.isin(pid, tr_pat))[0]; b_te = np.where(np.isin(pid, te_pat))[0]
-        m_te = np.mean([n21.margins(n21.train(feats, b_tr, labels, "pvc", lr, dropout, ep, device, seed=SEED + k)[0],
-                                    feats, b_te, "pvc") for k in range(ensemble)], axis=0)
+        m_te = np.mean([n21.margins(n21.train(feats, b_tr, labels, "pvc", lr, dropout, ep, device, seed=SEED + k,
+                                              progress=bar)[0], feats, b_te, "pvc") for k in range(ensemble)], axis=0)
+        bar.close()
         cnn_te = n21.patient_scores(m_te, pid[b_te])
         te_ids = cnn_te.index.to_numpy(); y_te = patients[te_ids].to_numpy()
         X_clin_te = clinical.reindex(te_ids)[clin_cols].to_numpy()

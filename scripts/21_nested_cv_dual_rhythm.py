@@ -149,8 +149,10 @@ def augment(psd, cwt, gen):
     return psd + 0.05 * torch.randn_like(psd), cwt + 0.05 * torch.randn_like(cwt)
 
 
-def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_sets=(), checkpoints=(), seed=SEED):
-    """Train one model; returns it and, for every checkpoint epoch, the beat margins of every eval set."""
+def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_sets=(), checkpoints=(), seed=SEED,
+          progress=None):
+    """Train one model; returns it and, for every checkpoint epoch, the beat margins of every eval set.
+    `progress` (optional tqdm bar) is advanced by one per epoch."""
     set_seed(seed)
     psd0, cwt0 = inputs(feats, beat_idx[:1], scenario)
     model = TwoBranchCNN(psd0.shape[1], cwt0.shape[1], dropout, psd12=OPTS["psd12"]).to(device)
@@ -174,6 +176,8 @@ def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_s
             opt.step()
         if ep in checkpoints:
             snaps[ep] = [margins(model, feats, s, scenario) for s in eval_sets]
+        if progress is not None:
+            progress.update(1)
     return model, snaps
 
 
