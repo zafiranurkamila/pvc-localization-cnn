@@ -235,13 +235,17 @@ def main():
     ap.add_argument("--ensemble", type=int, default=3, help="number of seeds of the outer model")
     ap.add_argument("--select", choices=["f1", "bacc"], default="f1", help="inner-loop criterion")
     ap.add_argument("--batch", type=int, default=16, help="batch size (lower it if the GPU runs out of memory)")
+    ap.add_argument("--lrs", type=float, nargs="+", default=LR_GRID, help="learning rates of the inner grid")
+    ap.add_argument("--epochs", type=int, nargs="+", default=EPOCH_CHECKPOINTS, help="epoch checkpoints of the grid")
     ap.add_argument("--check", action="store_true", help="load the checkpoint and the data, one forward pass")
     ap.add_argument("--trust-checkpoint", action="store_true",
                     help="load the checkpoint with weights_only=False (only if the allow-listed load still fails)")
     ap.add_argument("--quick", action="store_true", help="smoke test: 1 outer fold, 1 learning rate, 2 epochs")
     args = ap.parse_args()
     n21.OPTS.update(select=args.select)
-    global TRUST_CHECKPOINT
+    global TRUST_CHECKPOINT, LR_GRID, EPOCH_CHECKPOINTS
+    grid_changed = sorted(args.lrs) != sorted(LR_GRID) or sorted(args.epochs) != sorted(EPOCH_CHECKPOINTS)
+    LR_GRID, EPOCH_CHECKPOINTS = list(args.lrs), sorted(args.epochs)
     TRUST_CHECKPOINT = args.trust_checkpoint
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("device:", device)
@@ -264,7 +268,9 @@ def main():
         return
     OUT.mkdir(parents=True, exist_ok=True)
     df, folds, pooled = run(rec, patients, device, 1 if args.quick else 5, args.quick, args.ensemble, args.batch)
-    name = "founder" + ("_bacc" if args.select == "bacc" else "") + f"_ens{args.ensemble}"
+    name = "founder" + ("_bacc" if args.select == "bacc" else "") \
+        + (f"_lr{'-'.join(f'{v:g}' for v in LR_GRID)}_ep{'-'.join(map(str, EPOCH_CHECKPOINTS))}" if grid_changed else "") \
+        + f"_ens{args.ensemble}"
     tag = f"{name}_quick" if args.quick else name
     df.to_csv(OUT / f"{tag}_patients.csv", index=False)
     (OUT / f"{tag}_folds.json").write_text(json.dumps(folds, indent=1))
