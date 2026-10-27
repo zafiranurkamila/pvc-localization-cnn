@@ -231,6 +231,7 @@ def run(rec, patients, device, n_outer, quick, ensemble, batch):
 
 
 def main():
+    global TRUST_CHECKPOINT, LR_GRID, EPOCH_CHECKPOINTS
     ap = argparse.ArgumentParser()
     ap.add_argument("--ensemble", type=int, default=3, help="number of seeds of the outer model")
     ap.add_argument("--select", choices=["f1", "bacc"], default="f1", help="inner-loop criterion")
@@ -243,7 +244,6 @@ def main():
     ap.add_argument("--quick", action="store_true", help="smoke test: 1 outer fold, 1 learning rate, 2 epochs")
     args = ap.parse_args()
     n21.OPTS.update(select=args.select)
-    global TRUST_CHECKPOINT, LR_GRID, EPOCH_CHECKPOINTS
     grid_changed = sorted(args.lrs) != sorted(LR_GRID) or sorted(args.epochs) != sorted(EPOCH_CHECKPOINTS)
     LR_GRID, EPOCH_CHECKPOINTS = list(args.lrs), sorted(args.epochs)
     TRUST_CHECKPOINT = args.trust_checkpoint
