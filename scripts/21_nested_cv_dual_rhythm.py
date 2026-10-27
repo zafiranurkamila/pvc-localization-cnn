@@ -10,6 +10,11 @@ Scenarios (same protocol, same folds):
   pvc   PSD (12 x 32) + CWT (12 x 64 x 200) of each PVC beat (the earlier fusion model)
   dual  as pvc, plus the PSD and CWT of the patient's median sinus beat (scripts/20_sinus_beats.py):
         PSD branch input 768 = PVC || sinus, CWT branch input 24 channels = PVC (12) + sinus (12)
+  diff  as dual, but the second half is the difference PVC - sinus (how the PVC deviates from the patient's own
+        conducted beat) instead of the sinus representation itself
+
+Ensemble (--ensemble K): hyperparameters, epochs and threshold are selected in the inner loop with one seed; the
+outer model is then trained with K seeds and the patient margins of the K models are averaged.
 
 Patient decision: mean logit margin (logit_LVOT - logit_RVOT) over the patient's PVC beats, compared with the
 threshold chosen in the inner loop (and, for reference, with 0).
@@ -18,6 +23,7 @@ Run on the PC (GPU). Needs data/processed, data/interim/patient_index.csv, data/
 Usage:
     python scripts/21_nested_cv_dual_rhythm.py                 # both scenarios
     python scripts/21_nested_cv_dual_rhythm.py --scenario dual --quick   # smoke test (1 outer fold, few epochs)
+    python scripts/21_nested_cv_dual_rhythm.py --scenario pvc diff --ensemble 5
 Output: results/nested_cv/<scenario>_patients.csv, <scenario>_folds.json, summary.json
 """
 import argparse
@@ -96,15 +102,18 @@ def load_features(device):
 
 def inputs(feats, idx, scenario):
     idx = torch.as_tensor(np.asarray(idx), dtype=torch.long, device=feats["psd"].device)
+    psd, cwt = feats["psd"][idx], feats["cwt"][idx]
     if scenario == "pvc":
-        return feats["psd"][idx], feats["cwt"][idx]
-    return (torch.cat([feats["psd"][idx], feats["sin_psd"][idx]], dim=1),
-            torch.cat([feats["cwt"][idx], feats["sin_cwt"][idx]], dim=1))
+        return psd, cwt
+    if scenario == "diff":
+        return (torch.cat([psd, psd - feats["sin_psd"][idx]], dim=1),
+                torch.cat([cwt, cwt - feats["sin_cwt"][idx]], dim=1))
+    return (torch.cat([psd, feats["sin_psd"][idx]], dim=1), torch.cat([cwt, feats["sin_cwt"][idx]], dim=1))
 
 
-def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_sets=(), checkpoints=()):
+def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_sets=(), checkpoints=(), seed=SEED):
     """Train one model; returns it and, for every checkpoint epoch, the beat margins of every eval set."""
-    set_seed(SEED)
+    set_seed(seed)
     psd0, cwt0 = inputs(feats, beat_idx[:1], scenario)
     model = TwoBranchCNN(psd0.shape[1], cwt0.shape[1], dropout).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -112,7 +121,7 @@ def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_s
     counts = np.bincount(labels[beat_idx], minlength=2)
     loss_fn = nn.CrossEntropyLoss(weight=torch.tensor(len(beat_idx) / (2 * np.maximum(counts, 1)),
                                                       dtype=torch.float32, device=device))
-    g = torch.Generator(device="cpu").manual_seed(SEED)
+    g = torch.Generator(device="cpu").manual_seed(seed)
     snaps = {}
     for ep in range(1, epochs + 1):
         model.train()
@@ -180,7 +189,7 @@ def bootstrap_ci(y, score, thr, n=2000):
     return {k: [float(np.percentile(v, 2.5)), float(np.percentile(v, 97.5))] for k, v in vals.items()}
 
 
-def run_scenario(scenario, feats, pid, labels, patients, device, n_outer, quick):
+def run_scenario(scenario, feats, pid, labels, patients, device, n_outer, quick, ensemble=1):
     all_p = patients.index.to_numpy(); all_y = patients.to_numpy()
     outer = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
     rows, folds = [], []
@@ -211,8 +220,9 @@ def run_scenario(scenario, feats, pid, labels, patients, device, n_outer, quick)
         lr, dropout, ep = best
         # outer fit on the whole outer training part with the chosen setting; predict the outer test fold once
         b_tr = np.where(np.isin(pid, tr_pat))[0]; b_te = np.where(np.isin(pid, te_pat))[0]
-        model, _ = train(feats, b_tr, labels, scenario, lr, dropout, ep, device)
-        s_te = patient_scores(margins(model, feats, b_te, scenario), pid[b_te])
+        m_te = np.mean([margins(train(feats, b_tr, labels, scenario, lr, dropout, ep, device, seed=SEED + k)[0],
+                                feats, b_te, scenario) for k in range(ensemble)], axis=0)
+        s_te = patient_scores(m_te, pid[b_te])
         for h, sc in s_te.items():
             rows.append({"hospital_id": h, "label": int(patients[h]), "outer_fold": fo, "score": float(sc),
                          "threshold": best_thr, "pred_thr": int(sc > best_thr), "pred_zero": int(sc > 0),
@@ -235,7 +245,8 @@ def run_scenario(scenario, feats, pid, labels, patients, device, n_outer, quick)
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scenario", choices=["pvc", "dual", "both"], default="both")
+    ap.add_argument("--scenario", nargs="+", choices=["pvc", "dual", "diff"], default=["pvc", "dual"])
+    ap.add_argument("--ensemble", type=int, default=1, help="number of seeds averaged in the outer model")
     ap.add_argument("--quick", action="store_true", help="smoke test: 1 outer fold, 1 setting, 5 epochs")
     args = ap.parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -245,15 +256,17 @@ def main():
     print(f"{len(pid)} PVC beats from {len(np.unique(pid))} patients")
     summary_path = OUT / ("summary_quick.json" if args.quick else "summary.json")
     summary = json.loads(summary_path.read_text()) if summary_path.exists() else {}
-    for sc in (["pvc", "dual"] if args.scenario == "both" else [args.scenario]):
-        df, folds, pooled = run_scenario(sc, feats, pid, labels, patients, device, 1 if args.quick else 5, args.quick)
-        tag = f"{sc}_quick" if args.quick else sc
+    for sc in args.scenario:
+        df, folds, pooled = run_scenario(sc, feats, pid, labels, patients, device, 1 if args.quick else 5, args.quick,
+                                         args.ensemble)
+        name = sc if args.ensemble == 1 else f"{sc}_ens{args.ensemble}"
+        tag = f"{name}_quick" if args.quick else name
         df.to_csv(OUT / f"{tag}_patients.csv", index=False)
         (OUT / f"{tag}_folds.json").write_text(json.dumps(folds, indent=1))
-        summary[sc] = pooled
+        summary[name] = pooled
         summary_path.write_text(json.dumps(summary, indent=1))
         m = pooled["threshold_inner"]
-        print(f"\n[{sc}] pooled over {pooled['patients']} patients ({pooled['lvot']} LVOT), inner-selected threshold: "
+        print(f"\n[{name}] pooled over {pooled['patients']} patients ({pooled['lvot']} LVOT), inner-selected threshold: "
               f"macro F1 {m['macro_f1']:.3f} {m['ci95']['macro_f1']}, accuracy {m['accuracy']:.3f}, "
               f"balanced acc {m['balanced_accuracy']:.3f}, sens {m['sensitivity']:.3f}, spec {m['specificity']:.3f}, "
               f"AUC {m['auc']:.3f}  (TP {m['tp']} FN {m['fn']} TN {m['tn']} FP {m['fp']})")
