@@ -134,7 +134,8 @@ def train(rec, patients, train_ids, lr, epochs, device, eval_ids=(), checkpoints
     set_seed(seed)
     model, _, _ = founder(device)
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
-    scaler = torch.cuda.amp.GradScaler(enabled=device == "cuda")
+    scaler = (torch.amp.GradScaler("cuda", enabled=device == "cuda") if hasattr(torch.amp, "GradScaler")
+              else torch.cuda.amp.GradScaler(enabled=device == "cuda"))
     y_all = patients[train_ids].to_numpy()
     counts = np.bincount(y_all, minlength=2)
     loss_fn = nn.CrossEntropyLoss(weight=torch.tensor(len(y_all) / (2 * np.maximum(counts, 1)), dtype=torch.float32,
