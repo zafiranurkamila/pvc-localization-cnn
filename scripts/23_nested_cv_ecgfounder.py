@@ -96,13 +96,32 @@ def eval_crops(x):
 
 
 # ---------------------------------------------------------------- model
+TRUST_CHECKPOINT = False
+
+
+def load_checkpoint():
+    """torch.load with weights_only=True; the checkpoint also stores numpy scalars (training metadata such as the
+    validation AUROC), so those numpy types are allow-listed. --trust-checkpoint falls back to a full unpickling."""
+    if TRUST_CHECKPOINT:
+        return torch.load(CKPT, map_location="cpu", weights_only=False)
+    try:
+        from numpy._core.multiarray import scalar
+    except ImportError:  # numpy < 2
+        from numpy.core.multiarray import scalar
+    safe = [(scalar, "numpy.core.multiarray.scalar"), (scalar, "numpy._core.multiarray.scalar"), np.dtype]
+    safe += [getattr(np.dtypes, n) for n in ("Float64DType", "Float32DType", "Int64DType", "Int32DType", "BoolDType")
+             if hasattr(np, "dtypes") and hasattr(np.dtypes, n)]
+    with torch.serialization.safe_globals(safe):
+        return torch.load(CKPT, map_location="cpu", weights_only=True)
+
+
 def founder(device):
     sys.path.insert(0, str(FOUNDER_DIR))
     from net1d import Net1D  # noqa: E402  (ECGFounder repository)
     model = Net1D(in_channels=12, base_filters=64, ratio=1, filter_list=[64, 160, 160, 400, 400, 1024, 1024],
                   m_blocks_list=[2, 2, 2, 3, 3, 4, 4], kernel_size=16, stride=2, groups_width=16, verbose=False,
                   use_bn=False, use_do=False, n_classes=150)
-    state = torch.load(CKPT, map_location="cpu")["state_dict"]
+    state = load_checkpoint()["state_dict"]
     state = {k.removeprefix("module."): v for k, v in state.items() if not k.removeprefix("module.").startswith("dense.")}
     missing, unexpected = model.load_state_dict(state, strict=False)
     model.dense = nn.Linear(model.dense.in_features, 2)
@@ -216,9 +235,13 @@ def main():
     ap.add_argument("--select", choices=["f1", "bacc"], default="f1", help="inner-loop criterion")
     ap.add_argument("--batch", type=int, default=16, help="batch size (lower it if the GPU runs out of memory)")
     ap.add_argument("--check", action="store_true", help="load the checkpoint and the data, one forward pass")
+    ap.add_argument("--trust-checkpoint", action="store_true",
+                    help="load the checkpoint with weights_only=False (only if the allow-listed load still fails)")
     ap.add_argument("--quick", action="store_true", help="smoke test: 1 outer fold, 1 learning rate, 2 epochs")
     args = ap.parse_args()
     n21.OPTS.update(select=args.select)
+    global TRUST_CHECKPOINT
+    TRUST_CHECKPOINT = args.trust_checkpoint
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("device:", device)
     if not CKPT.exists():
