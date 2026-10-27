@@ -13,6 +13,13 @@ Scenarios (same protocol, same folds):
   diff  as dual, but the second half is the difference PVC - sinus (how the PVC deviates from the patient's own
         conducted beat) instead of the sinus representation itself
 
+Options (all applied identically in the inner and the outer loop; never chosen on the outer test fold):
+  --psd12    PSD branch as a 1D CNN over the 32 frequency bins with one input channel per lead (and per sinus/diff
+             half), instead of one 384-value sequence; kernels no longer cross lead boundaries
+  --augment  training-only augmentation: random circular time shift of the scalogram by up to +-5 columns (+-20 ms)
+             and Gaussian noise (sd 0.05) on both inputs
+  --wd W     Adam weight decay
+
 Ensemble (--ensemble K): hyperparameters, epochs and threshold are selected in the inner loop with one seed; the
 outer model is then trained with K seeds and the patient margins of the K models are averaged.
 
@@ -60,12 +67,29 @@ BATCH = 64
 SEED = config.RANDOM_SEED
 
 
+class PSDLeadBlock(nn.Module):
+    """1D CNN over frequency with one channel per lead: input (batch, channels * 32) reshaped to (batch, channels, 32)."""
+
+    def __init__(self, channels: int, n_filters: int = 64, n_bins: int = 32):
+        super().__init__()
+        self.channels, self.n_bins = channels, n_bins
+        self.net = nn.Sequential(nn.BatchNorm1d(channels),
+                                 nn.Conv1d(channels, n_filters // 2, 3, padding=1), nn.ReLU(),
+                                 nn.Conv1d(n_filters // 2, n_filters, 3, padding=1), nn.ReLU(),
+                                 nn.AdaptiveAvgPool1d(16))
+        self.output_size = n_filters * 16
+
+    def forward(self, x):
+        return self.net(x.view(x.size(0), self.channels, self.n_bins)).flatten(1)
+
+
 class TwoBranchCNN(nn.Module):
     """PSD branch (1D) + CWT branch (2D) + classifier, as the earlier fusion model; input sizes set per scenario."""
 
-    def __init__(self, psd_len: int, cwt_channels: int, dropout: float, n_filters: int = 64, hidden: int = 64):
+    def __init__(self, psd_len: int, cwt_channels: int, dropout: float, n_filters: int = 64, hidden: int = 64,
+                 psd12: bool = False):
         super().__init__()
-        self.psd = PSDBlock(input_size=psd_len, hidden=n_filters)
+        self.psd = PSDLeadBlock(psd_len // 32, n_filters) if psd12 else PSDBlock(input_size=psd_len, hidden=n_filters)
         self.cwt = WaveletBlock(n_leads=cwt_channels, hidden=n_filters)
         self.head = nn.Sequential(nn.Linear(self.psd.output_size + self.cwt.output_size, hidden), nn.ReLU(),
                                   nn.Dropout(dropout), nn.Linear(hidden, hidden // 2), nn.ReLU(),
@@ -111,12 +135,24 @@ def inputs(feats, idx, scenario):
     return (torch.cat([psd, feats["sin_psd"][idx]], dim=1), torch.cat([cwt, feats["sin_cwt"][idx]], dim=1))
 
 
+OPTS = {"psd12": False, "augment": False, "wd": 0.0}
+
+
+def augment(psd, cwt, gen):
+    """Training-only augmentation on the device: per-sample circular time shift of the scalogram and Gaussian noise."""
+    b, t = cwt.shape[0], cwt.shape[-1]
+    shift = torch.randint(-5, 6, (b,), generator=gen).to(cwt.device)
+    idx = (torch.arange(t, device=cwt.device)[None, :] - shift[:, None]) % t
+    cwt = torch.gather(cwt, -1, idx[:, None, None, :].expand_as(cwt))
+    return psd + 0.05 * torch.randn_like(psd), cwt + 0.05 * torch.randn_like(cwt)
+
+
 def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_sets=(), checkpoints=(), seed=SEED):
     """Train one model; returns it and, for every checkpoint epoch, the beat margins of every eval set."""
     set_seed(seed)
     psd0, cwt0 = inputs(feats, beat_idx[:1], scenario)
-    model = TwoBranchCNN(psd0.shape[1], cwt0.shape[1], dropout).to(device)
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
+    model = TwoBranchCNN(psd0.shape[1], cwt0.shape[1], dropout, psd12=OPTS["psd12"]).to(device)
+    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=OPTS["wd"])
     y = torch.tensor(labels[beat_idx], device=device)
     counts = np.bincount(labels[beat_idx], minlength=2)
     loss_fn = nn.CrossEntropyLoss(weight=torch.tensor(len(beat_idx) / (2 * np.maximum(counts, 1)),
@@ -129,6 +165,8 @@ def train(feats, beat_idx, labels, scenario, lr, dropout, epochs, device, eval_s
         for k in range(0, len(perm) - BATCH + 1, BATCH):  # drop_last, as in the earlier trainer
             b = perm[k:k + BATCH]
             psd, cwt = inputs(feats, beat_idx[b.numpy()], scenario)
+            if OPTS["augment"]:
+                psd, cwt = augment(psd, cwt, g)
             opt.zero_grad()
             loss_fn(model(psd, cwt), y[b.to(device)]).backward()
             opt.step()
@@ -247,8 +285,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenario", nargs="+", choices=["pvc", "dual", "diff"], default=["pvc", "dual"])
     ap.add_argument("--ensemble", type=int, default=1, help="number of seeds averaged in the outer model")
+    ap.add_argument("--psd12", action="store_true", help="PSD branch with one channel per lead")
+    ap.add_argument("--augment", action="store_true", help="training-only time-shift and noise augmentation")
+    ap.add_argument("--wd", type=float, default=0.0, help="Adam weight decay")
     ap.add_argument("--quick", action="store_true", help="smoke test: 1 outer fold, 1 setting, 5 epochs")
     args = ap.parse_args()
+    OPTS.update(psd12=args.psd12, augment=args.augment, wd=args.wd)
+    suffix = ("_psd12" if args.psd12 else "") + ("_aug" if args.augment else "") + (f"_wd{args.wd:g}" if args.wd else "")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("device:", device)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -259,7 +302,7 @@ def main():
     for sc in args.scenario:
         df, folds, pooled = run_scenario(sc, feats, pid, labels, patients, device, 1 if args.quick else 5, args.quick,
                                          args.ensemble)
-        name = sc if args.ensemble == 1 else f"{sc}_ens{args.ensemble}"
+        name = sc + suffix + ("" if args.ensemble == 1 else f"_ens{args.ensemble}")
         tag = f"{name}_quick" if args.quick else name
         df.to_csv(OUT / f"{tag}_patients.csv", index=False)
         (OUT / f"{tag}_folds.json").write_text(json.dumps(folds, indent=1))
