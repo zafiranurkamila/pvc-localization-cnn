@@ -19,6 +19,8 @@ Options (all applied identically in the inner and the outer loop; never chosen o
   --augment  training-only augmentation: random circular time shift of the scalogram by up to +-5 columns (+-20 ms)
              and Gaussian noise (sd 0.05) on both inputs
   --wd W     Adam weight decay
+  --select   inner-loop criterion for the setting and the patient threshold: f1 (macro F1, default) or bacc
+             (balanced accuracy)
 
 Ensemble (--ensemble K): hyperparameters, epochs and threshold are selected in the inner loop with one seed; the
 outer model is then trained with K seeds and the patient margins of the K models are averaged.
@@ -135,7 +137,7 @@ def inputs(feats, idx, scenario):
     return (torch.cat([psd, feats["sin_psd"][idx]], dim=1), torch.cat([cwt, feats["sin_cwt"][idx]], dim=1))
 
 
-OPTS = {"psd12": False, "augment": False, "wd": 0.0}
+OPTS = {"psd12": False, "augment": False, "wd": 0.0, "select": "f1"}
 
 
 def augment(psd, cwt, gen):
@@ -191,13 +193,16 @@ def patient_scores(beat_margins, beat_pid):
     return s
 
 
-def macro_f1_at(scores, y, thr):
+def criterion_at(scores, y, thr):
+    if OPTS["select"] == "bacc":
+        pred = (scores > thr).astype(int)
+        return (np.mean(pred[y == 1] == 1) + np.mean(pred[y == 0] == 0)) / 2
     return f1_score(y, (scores > thr).astype(int), average="macro", zero_division=0)
 
 
 def best_threshold(scores, y):
     cand = np.unique(np.concatenate([[0.0], (np.sort(scores)[1:] + np.sort(scores)[:-1]) / 2]))
-    f = [macro_f1_at(scores, y, c) for c in cand]
+    f = [criterion_at(scores, y, c) for c in cand]
     best = np.max(f)
     # among ties, the threshold closest to 0 (the uncalibrated default)
     return float(cand[np.argmin(np.where(np.isclose(f, best), np.abs(cand), np.inf))])
@@ -252,7 +257,7 @@ def run_scenario(scenario, feats, pid, labels, patients, device, n_outer, quick,
         for key, parts in oof.items():
             s = pd.concat(parts); y = patients[s.index].to_numpy()
             thr = best_threshold(s.to_numpy(), y)
-            f = macro_f1_at(s.to_numpy(), y, thr)
+            f = criterion_at(s.to_numpy(), y, thr)
             if f > best_f1:
                 best, best_f1, best_thr = key, f, thr
         lr, dropout, ep = best
@@ -288,10 +293,13 @@ def main():
     ap.add_argument("--psd12", action="store_true", help="PSD branch with one channel per lead")
     ap.add_argument("--augment", action="store_true", help="training-only time-shift and noise augmentation")
     ap.add_argument("--wd", type=float, default=0.0, help="Adam weight decay")
+    ap.add_argument("--select", choices=["f1", "bacc"], default="f1",
+                    help="inner-loop criterion for the setting and the threshold: macro F1 or balanced accuracy")
     ap.add_argument("--quick", action="store_true", help="smoke test: 1 outer fold, 1 setting, 5 epochs")
     args = ap.parse_args()
-    OPTS.update(psd12=args.psd12, augment=args.augment, wd=args.wd)
-    suffix = ("_psd12" if args.psd12 else "") + ("_aug" if args.augment else "") + (f"_wd{args.wd:g}" if args.wd else "")
+    OPTS.update(psd12=args.psd12, augment=args.augment, wd=args.wd, select=args.select)
+    suffix = ("_psd12" if args.psd12 else "") + ("_aug" if args.augment else "") + (f"_wd{args.wd:g}" if args.wd else "") \
+        + ("_bacc" if args.select == "bacc" else "")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("device:", device)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -313,6 +321,9 @@ def main():
               f"macro F1 {m['macro_f1']:.3f} {m['ci95']['macro_f1']}, accuracy {m['accuracy']:.3f}, "
               f"balanced acc {m['balanced_accuracy']:.3f}, sens {m['sensitivity']:.3f}, spec {m['specificity']:.3f}, "
               f"AUC {m['auc']:.3f}  (TP {m['tp']} FN {m['fn']} TN {m['tn']} FP {m['fp']})")
+        z = pooled["threshold_zero"]
+        print(f"[{name}] threshold 0 (reference): macro F1 {z['macro_f1']:.3f}, accuracy {z['accuracy']:.3f}, "
+              f"balanced acc {z['balanced_accuracy']:.3f}, sens {z['sensitivity']:.3f}, spec {z['specificity']:.3f}")
     print("written", OUT)
 
 
