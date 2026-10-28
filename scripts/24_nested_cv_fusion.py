@@ -135,9 +135,9 @@ def standardiser(s):
 
 
 # ---------------------------------------------------------------- nested CV
-def run(rec, feats, pid, labels, patients, device, n_outer, quick, ensemble, batch):
+def run(rec, feats, pid, labels, patients, device, n_outer, quick, ensemble, batch, split_seed=SEED):
     all_p = patients.index.to_numpy(); all_y = patients.to_numpy()
-    outer = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
+    outer = StratifiedKFold(n_splits=5, shuffle=True, random_state=split_seed)
     f_lrs, f_ckpts = (FOUNDER_LRS[:1], [1, 2]) if quick else (FOUNDER_LRS, FOUNDER_EPOCHS)
     c_ckpts = [3, 5] if quick else n21.EPOCH_CHECKPOINTS
     grid = [dict(zip(n21.GRID, v)) for v in product(*n21.GRID.values())][: (1 if quick else None)]
@@ -147,7 +147,7 @@ def run(rec, feats, pid, labels, patients, device, n_outer, quick, ensemble, bat
             break
         t0 = time.time()
         tr_pat, te_pat = all_p[tr_p], all_p[te_p]
-        inner = list(StratifiedKFold(n_splits=3, shuffle=True, random_state=SEED + fo)
+        inner = list(StratifiedKFold(n_splits=3, shuffle=True, random_state=split_seed + fo)
                      .split(tr_pat, patients[tr_pat].to_numpy()))
         # progress in epochs (ECGFounder and CNN epochs alike); grows once the chosen epochs are known
         bar = tqdm(total=len(inner) * (len(f_lrs) * max(f_ckpts) + len(grid) * max(c_ckpts)),
@@ -212,6 +212,8 @@ def main():
     ap.add_argument("--epochs", type=int, nargs="+", default=FOUNDER_EPOCHS, help="ECGFounder: epoch checkpoints")
     ap.add_argument("--batch", type=int, default=16, help="ECGFounder batch size")
     ap.add_argument("--trust-checkpoint", action="store_true", help="as script 23")
+    ap.add_argument("--split-seed", type=int, default=SEED,
+                    help="seed of the outer (and inner) patient folds; another value repeats the nested CV on a new split")
     ap.add_argument("--quick", action="store_true", help="smoke test: 1 outer fold, short grids")
     args = ap.parse_args()
     n21.OPTS.update(psd12=args.psd12, augment=args.augment, wd=args.wd, select=args.select)
@@ -221,7 +223,7 @@ def main():
     suffix = ("_psd12" if args.psd12 else "") + ("_aug" if args.augment else "") + (f"_wd{args.wd:g}" if args.wd else "") \
         + ("_bacc" if args.select == "bacc" else "") \
         + (f"_lr{'-'.join(f'{v:g}' for v in FOUNDER_LRS)}_ep{'-'.join(map(str, FOUNDER_EPOCHS))}" if grid_changed else "") \
-        + f"_ens{args.ensemble}"
+        + f"_ens{args.ensemble}" + (f"_split{args.split_seed}" if args.split_seed != SEED else "")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("device:", device)
     if not n23.CKPT.exists():
@@ -231,7 +233,7 @@ def main():
     feats, pid, labels, _ = n21.load_features(device)
     print(f"{len(rec)} recordings; {len(pid)} PVC beats from {len(np.unique(pid))} patients")
     df, oof, folds, pooled = run(rec, feats, pid, labels, patients, device, 1 if args.quick else 5, args.quick,
-                                 args.ensemble, args.batch)
+                                 args.ensemble, args.batch, args.split_seed)
     tag = "fusion" + suffix + ("_quick" if args.quick else "")
     df.to_csv(OUT / f"{tag}_patients.csv", index=False)
     oof.to_csv(OUT / f"{tag}_inner_oof.csv", index=False)
