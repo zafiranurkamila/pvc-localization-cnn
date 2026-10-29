@@ -1,54 +1,42 @@
 """Inspect the OTVA dataset of github.com/uripont/arrhythmia-origin-predictor (release `dataset`) before any use.
 
-The data come as pickle files, and unpickling a file from an unknown source can run arbitrary code. This script
-therefore first scans the pickle opcodes and lists every class or function the file would import; it loads the file
-only if all of them belong to an allow-list of data libraries (pandas, numpy, builtins, ...). --trust skips the check.
+The data come as a pickle file, and unpickling a file from an unknown source can run arbitrary code. The file is
+therefore loaded with a restricted unpickler that resolves only classes and functions of data libraries (numpy,
+pandas, builtins and a few standard modules); any other import stops the load and is reported.
+
+The pickle in the zip is about 7 GB; it is extracted next to the zip once (streamed, not read into memory) and loaded
+from disk. Loading still needs roughly as much RAM as the file size.
 
 What it reports, to decide whether the data can serve as an external validation of the PVC models:
   zip contents; top-level type; columns; number of patients; label columns and their values (side and
-  sub-location); the structure of the ECG column (keys = regions / positions, array shapes, sampling); and
-  whether the ECGs are spontaneous PVCs or pace maps (names of the recording positions).
+  sub-location); the structure of the ECG column (keys = regions / positions, array shapes); and the names of the
+  recording positions, which show whether the ECGs are spontaneous PVCs or pace maps.
 
-Usage (on the PC, after downloading dataset_arrhythmias.zip from the release into data/external/otva_upf/):
+Usage (on the PC, with dataset_arrhythmias.zip in data/external/otva_upf/):
     python scripts/29_inspect_external_dataset.py data/external/otva_upf/dataset_arrhythmias.zip
-    python scripts/29_inspect_external_dataset.py data/external/otva_upf/all_points_may_2024.pkl
-Output: printed report only (nothing is written)
+Output: printed report; the extracted all_points_may_2024.pkl and the two label .xlsx in data/external/otva_upf/
 """
 import argparse
 import collections
-import io
 import pickle
-import pickletools
+import shutil
 import sys
 import zipfile
 from pathlib import Path
 
-SAFE_MODULES = ("pandas", "numpy", "builtins", "collections", "datetime", "copyreg", "_codecs", "decimal")
+SAFE_MODULES = ("numpy", "pandas", "builtins", "collections", "datetime", "copyreg", "_codecs", "decimal")
 
 
-def imported_globals(data):
-    """(module, name) pairs that the pickle would import, from its opcodes."""
-    found, strings = set(), []
-    for op, arg, _ in pickletools.genops(io.BytesIO(data)):
-        if op.name in ("SHORT_BINUNICODE", "BINUNICODE", "UNICODE", "BINUNICODE8"):
-            strings.append(arg)
-        if op.name == "GLOBAL":
-            mod, name = arg.split(" ", 1)
-            found.add((mod, name))
-        elif op.name == "STACK_GLOBAL" and len(strings) >= 2:
-            found.add((strings[-2], strings[-1]))
-    return found
+class RestrictedUnpickler(pickle.Unpickler):
+    """Unpickler that may import only from data libraries; everything else raises."""
+
+    def find_class(self, module, name):
+        if module.split(".")[0] in SAFE_MODULES:
+            return super().find_class(module, name)
+        raise pickle.UnpicklingError(f"blocked import {module}.{name}")
 
 
-def check(data, trust):
-    glob = imported_globals(data)
-    unsafe = sorted(g for g in glob if not g[0].split(".")[0] in SAFE_MODULES)
-    print(f"  pickle imports {len(glob)} names; outside the allow-list: {unsafe or 'none'}")
-    if unsafe and not trust:
-        sys.exit("  not loaded: the file imports names outside the allow-list (inspect them, then use --trust if safe)")
-
-
-def describe_value(v, depth=0, max_items=6):
+def describe_value(v, depth=0, max_items=8):
     pad = "    " * (depth + 2)
     if isinstance(v, dict):
         keys = list(v)
@@ -60,10 +48,10 @@ def describe_value(v, depth=0, max_items=6):
         if v and depth < 3:
             describe_value(v[0], depth + 1)
     elif hasattr(v, "shape"):
-        print(f"{pad}{type(v).__name__} shape {getattr(v, 'shape', None)}"
-              + (f" columns {list(v.columns)[:12]}" if hasattr(v, "columns") else ""))
+        print(f"{pad}{type(v).__name__} shape {getattr(v, 'shape', None)} dtype {getattr(v, 'dtype', '')}"
+              + (f" columns {list(v.columns)[:14]}" if hasattr(v, "columns") else ""))
     else:
-        print(f"{pad}{type(v).__name__}: {str(v)[:80]}")
+        print(f"{pad}{type(v).__name__}: {str(v)[:100]}")
 
 
 def inspect_object(obj):
@@ -76,42 +64,65 @@ def inspect_object(obj):
     print("   ", list(obj.columns))
     for c in obj.columns:
         s = obj[c]
-        if s.dtype == object and s.map(lambda x: isinstance(x, (dict, list))).any():
+        nested = s.dtype == object and s.map(lambda x: isinstance(x, (dict, list))).any()
+        if nested:
             print(f"  column {c!r} holds nested data; first non-empty entry:")
-            describe_value(next(x for x in s if isinstance(x, (dict, list)) and len(x)))
-            # names of regions / positions across all patients: pace maps are usually named by catheter position
-            names = collections.Counter(k for x in s if isinstance(x, dict) for k in x)
-            if names:
-                print(f"    keys over all rows ({len(names)} distinct): {names.most_common(25)}")
-        elif s.nunique() <= 40:
-            print(f"  column {c!r}: {s.value_counts(dropna=False).to_dict()}")
+            first = next(x for x in s if isinstance(x, (dict, list)) and len(x))
+            describe_value(first)
+            # names of regions and of positions over all rows (pace maps are named by catheter position)
+            level1 = collections.Counter(k for x in s if isinstance(x, dict) for k in x)
+            level2 = collections.Counter(k2 for x in s if isinstance(x, dict) for v in x.values()
+                                         if isinstance(v, dict) for k2 in v)
+            if level1:
+                print(f"    level-1 keys over all rows ({len(level1)} distinct): {level1.most_common(30)}")
+            if level2:
+                print(f"    level-2 keys over all rows ({len(level2)} distinct): {level2.most_common(30)}")
         else:
-            print(f"  column {c!r}: {s.nunique()} distinct values, e.g. {s.dropna().head(3).tolist()}")
+            try:
+                n = s.nunique()
+            except TypeError:
+                print(f"  column {c!r}: unhashable values, e.g. {str(s.iloc[0])[:80]}")
+                continue
+            if n <= 40:
+                print(f"  column {c!r}: {s.value_counts(dropna=False).to_dict()}")
+            else:
+                print(f"  column {c!r}: {n} distinct values, e.g. {s.dropna().head(3).tolist()}")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("path", help="the downloaded zip or an extracted .pkl")
-    ap.add_argument("--trust", action="store_true", help="load even if the pickle imports names outside the allow-list")
     args = ap.parse_args()
     path = Path(args.path)
+    pkl = path
     if path.suffix == ".zip":
         with zipfile.ZipFile(path) as z:
-            infos = z.infolist()
+            infos = [i for i in z.infolist() if not i.filename.startswith("__MACOSX")]
             print(f"{path.name}: {len(infos)} files")
-            for i in infos[:60]:
+            for i in infos:
                 print(f"  {i.filename}  {i.file_size / 1e6:.1f} MB")
-            pkls = [i for i in infos if i.filename.endswith((".pkl", ".pickle"))]
-            for i in pkls:
-                print(f"\n{i.filename}:")
-                data = z.read(i)
-                check(data, args.trust)
-                inspect_object(pickle.loads(data))
-    else:
-        data = path.read_bytes()
-        print(f"{path.name}:")
-        check(data, args.trust)
-        inspect_object(pickle.loads(data))
+            for i in infos:
+                if i.filename.endswith((".pkl", ".xlsx")):
+                    out = path.parent / Path(i.filename).name
+                    if not out.exists():
+                        print(f"extracting {i.filename} -> {out}")
+                        with z.open(i) as src, open(out, "wb") as dst:
+                            shutil.copyfileobj(src, dst, length=16 << 20)
+                    if out.suffix == ".pkl":
+                        pkl = out
+    print(f"\nloading {pkl.name} with the restricted unpickler ...")
+    try:
+        with open(pkl, "rb") as f:
+            obj = RestrictedUnpickler(f).load()
+    except pickle.UnpicklingError as e:
+        sys.exit(f"  not loaded: {e}")
+    inspect_object(obj)
+    import pandas as pd
+    for x in sorted(pkl.parent.glob("*.xlsx")):
+        print(f"\n{x.name}:")
+        for sheet, df in pd.read_excel(x, sheet_name=None).items():
+            print(f"  sheet {sheet!r}: {df.shape}, columns {list(df.columns)[:12]}")
+            print(df.head(8).to_string(max_colwidth=40))
 
 
 if __name__ == "__main__":
