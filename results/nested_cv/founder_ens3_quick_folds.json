@@ -1,0 +1,22 @@
+[
+ {
+  "outer_fold": 0,
+  "learning_rate": 0.0001,
+  "epochs": 2,
+  "threshold": -0.1193644218146801,
+  "inner_criterion": 0.6687589040530217,
+  "test_patients": 66,
+  "test_lvot": 15,
+  "test_macro_f1": 0.7373737373737375,
+  "test_accuracy": 0.803030303030303,
+  "test_balanced_accuracy": 0.7549019607843137,
+  "test_sensitivity": 0.6666666666666666,
+  "test_specificity": 0.8431372549019608,
+  "test_auc": 0.8745098039215686,
+  "test_tp": 10,
+  "test_fn": 5,
+  "test_tn": 43,
+  "test_fp": 8,
+  "minutes": 0.7
+ }
+]

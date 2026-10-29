@@ -1,0 +1,69 @@
+split,hospital_id,label,sublocation,would_be_wrong
+42,893994,0,AnteriorSeptal,False
+42,904933,1,LCC,True
+42,937329,0,RC,False
+42,953509,0,not recorded,False
+42,978916,0,LC,True
+42,990964,1,RCC,True
+42,808536,1,LCC,False
+42,901632,1,AMC,False
+42,902441,1,LCC-RCC Ommisure,True
+42,911986,1,LCC,False
+42,907714,0,AC,True
+42,1022064,0,LC,False
+42,1067551,0,AC,False
+42,744169,0,AnteriorSeptal,False
+42,762912,1,LCC,False
+42,860162,0,PosteriorSeptal,True
+42,930882,0,LC,False
+42,906321,1,LCC,True
+42,937071,1,LCC,False
+42,938165,0,FreeWall,False
+42,944160,0,AC,False
+42,957816,0,not recorded,True
+7,805885,0,AnteriorSeptal,True
+7,990964,1,RCC,True
+7,906321,1,LCC,True
+7,1022064,0,LC,True
+7,837563,0,PosteriorSeptal,False
+7,865441,0,LC,True
+7,896260,0,LC,False
+7,902441,1,LCC-RCC Ommisure,True
+7,911986,1,LCC,True
+7,949589,0,RC,True
+7,965382,0,not recorded,True
+7,976913,0,LC,True
+7,1035943,1,AMC,False
+7,742264,0,AnteriorSeptal,False
+7,909279,0,not recorded,False
+7,808536,1,LCC,False
+7,888241,1,Summit,False
+7,901632,1,AMC,False
+7,904933,1,LCC,True
+7,937329,0,RC,False
+7,1038743,1,RCC,True
+123,743463,0,AnteriorSeptal,False
+123,840297,0,not recorded,False
+123,760568,0,PosteriorSeptal,True
+123,896260,0,LC,True
+123,937071,1,LCC,False
+123,988362,0,LC,False
+123,1015313,1,not recorded,False
+123,1034448,0,LC,False
+123,1067551,0,AC,False
+123,777221,0,RVOTOther,True
+123,902441,1,LCC-RCC Ommisure,False
+123,988990,0,LC,False
+123,1035943,1,AMC,False
+123,808536,1,LCC,False
+123,837563,0,PosteriorSeptal,False
+123,906321,1,LCC,True
+123,911986,1,LCC,True
+123,937329,0,RC,True
+123,1038743,1,RCC,True
+123,762912,1,LCC,True
+123,824020,0,PosteriorSeptal,True
+123,860162,0,PosteriorSeptal,True
+123,907714,0,AC,False
+123,1022064,0,LC,True
+123,1026923,0,LC,False

@@ -1,0 +1,77 @@
+[
+ {
+  "outer_fold": 0,
+  "founder": {
+   "learning_rate": 0.0003,
+   "epochs": 2,
+   "inner_criterion_1seed": 0.7689472669223681
+  },
+  "cnn": {
+   "learning_rate": 0.001,
+   "dropout": 0.3,
+   "epochs": 5,
+   "inner_criterion_1seed": 0.7760177141883836
+  },
+  "weight_founder": 0.5,
+  "inner_auc_by_weight": {
+   "0.0": 0.8308702791461412,
+   "0.25": 0.8718390804597701,
+   "0.5": 0.8980295566502462,
+   "0.75": 0.8903940886699507,
+   "1.0": 0.8533661740558292
+  },
+  "inner_auc": {
+   "founder": 0.8533661740558292,
+   "cnn": 0.8308702791461412,
+   "fusion": 0.8980295566502462,
+   "fusion_equal": 0.8980295566502462
+  },
+  "thresholds": {
+   "founder": 0.0991319790482521,
+   "cnn": 0.8365189782343805,
+   "fusion": 0.6531919852068917,
+   "fusion_equal": 0.6531919852068917
+  },
+  "test_founder_macro_f1": 0.8181818181818181,
+  "test_founder_accuracy": 0.8636363636363636,
+  "test_founder_balanced_accuracy": 0.8411764705882353,
+  "test_founder_sensitivity": 0.8,
+  "test_founder_specificity": 0.8823529411764706,
+  "test_founder_auc": 0.934640522875817,
+  "test_founder_tp": 12,
+  "test_founder_fn": 3,
+  "test_founder_tn": 45,
+  "test_founder_fp": 6,
+  "test_cnn_macro_f1": 0.8186813186813187,
+  "test_cnn_accuracy": 0.8787878787878788,
+  "test_cnn_balanced_accuracy": 0.803921568627451,
+  "test_cnn_sensitivity": 0.6666666666666666,
+  "test_cnn_specificity": 0.9411764705882353,
+  "test_cnn_auc": 0.9411764705882353,
+  "test_cnn_tp": 10,
+  "test_cnn_fn": 5,
+  "test_cnn_tn": 48,
+  "test_cnn_fp": 3,
+  "test_fusion_macro_f1": 0.9137254901960785,
+  "test_fusion_accuracy": 0.9393939393939394,
+  "test_fusion_balanced_accuracy": 0.9137254901960785,
+  "test_fusion_sensitivity": 0.8666666666666667,
+  "test_fusion_specificity": 0.9607843137254902,
+  "test_fusion_auc": 0.9594771241830065,
+  "test_fusion_tp": 13,
+  "test_fusion_fn": 2,
+  "test_fusion_tn": 49,
+  "test_fusion_fp": 2,
+  "test_fusion_equal_macro_f1": 0.9137254901960785,
+  "test_fusion_equal_accuracy": 0.9393939393939394,
+  "test_fusion_equal_balanced_accuracy": 0.9137254901960785,
+  "test_fusion_equal_sensitivity": 0.8666666666666667,
+  "test_fusion_equal_specificity": 0.9607843137254902,
+  "test_fusion_equal_auc": 0.9594771241830065,
+  "test_fusion_equal_tp": 13,
+  "test_fusion_equal_fn": 2,
+  "test_fusion_equal_tn": 49,
+  "test_fusion_equal_fp": 2,
+  "minutes": 1.0
+ }
+]
