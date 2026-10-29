@@ -272,14 +272,21 @@ def main():
 
     cache = CACHE / ("development_quick.pt" if args.quick else f"development_ens{ensemble}.pt")
     rec, patients = n23.load_recordings()
+    dev = None
     if cache.exists():
-        print("reusing the development of", cache)
-        dev = torch.load(cache, weights_only=False)
-    else:
+        try:
+            dev = torch.load(cache, weights_only=False)
+            print("reusing the development of", cache)
+        except Exception as e:  # noqa: BLE001  (an interrupted save leaves an unreadable file)
+            print(f"cached development unreadable ({e.__class__.__name__}); developing again")
+            cache.unlink()
+    if dev is None:
         feats, pid, labels, _ = n21.load_features(device)
         clinical = pd.read_csv(n21.OUT / "clinical_features.csv", index_col="hospital_id")
         dev = develop(rec, feats, pid, labels, patients, clinical, device, ensemble, args.quick, args.batch)
-        torch.save(dev, cache)
+        tmp = cache.with_suffix(".tmp")
+        torch.save(dev, tmp)
+        tmp.replace(cache)  # only a complete file gets the cache name
     rules = decision_rules(dev, patients)
     print("development settings:", dev["settings"], "| fusion weight", rules["w"])
 
