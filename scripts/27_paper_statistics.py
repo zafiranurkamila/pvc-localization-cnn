@@ -8,10 +8,15 @@
 3. Selective classification (scripts/26, primary target coverage 90 %) per split, with bootstrap 95 % CIs.
 4. Profile of the referred (abstained) patients at the primary coverage: class, sub-location, and how many of them
    the model would have misclassified.
+5. Calibration of fusion, ECGFounder and the CNN: per outer fold, Platt scaling (logistic regression of the label
+   on the score) fitted on the inner out-of-fold scores maps the outer-test scores to LVOT probabilities; reported
+   are the Brier score, the calibration slope and intercept (logistic regression of the label on the logit of the
+   probability) and the mean predicted vs observed LVOT rate.
 
 Usage (after scripts 22 --features-only, 24 for the three splits, and 26):
     python scripts/27_paper_statistics.py
-Output: results/nested_cv/paper_stats.json, paper_pairwise.csv, paper_clinical_patients.csv, paper_referred.csv
+Output: results/nested_cv/paper_stats.json, paper_pairwise.csv, paper_clinical_patients.csv, paper_referred.csv,
+        paper_calibration_patients.csv
 """
 import importlib.util
 import json
@@ -19,7 +24,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import brier_score_loss
 from sklearn.model_selection import StratifiedKFold
 
 
@@ -86,6 +92,27 @@ def paired_bootstrap(y, s, t, a, b, rng):
     return out
 
 
+CALIBRATED = ("fusion", "founder", "cnn")
+
+
+def platt(df, inner, model):
+    """Outer-test LVOT probabilities: per outer fold, logistic regression of the label on the inner out-of-fold
+    score (essentially unpenalised), applied to the outer-test scores of that fold."""
+    p = pd.Series(np.nan, index=df.index)
+    for fo, te in df.groupby("outer_fold"):
+        inn = inner[inner.outer_fold == fo]
+        lr = LogisticRegression(C=1e6, max_iter=1000).fit(inn[[f"{model}_score"]].to_numpy(), inn.label.to_numpy())
+        p[te.index] = lr.predict_proba(te[[f"{model}_score"]].to_numpy())[:, 1]
+    return p.to_numpy()
+
+
+def calibration(y, p):
+    logit = np.log(np.clip(p, 1e-6, 1 - 1e-6) / np.clip(1 - p, 1e-6, 1))
+    fit = LogisticRegression(C=1e6, max_iter=1000).fit(logit[:, None], y)
+    return {"brier": float(brier_score_loss(y, p)), "slope": float(fit.coef_[0][0]),
+            "intercept": float(fit.intercept_[0]), "mean_predicted": float(p.mean()), "observed": float(y.mean())}
+
+
 def holm(pvals):
     order = np.argsort(pvals); m = len(pvals); adj = np.empty(m); run = 0.0
     for r, i in enumerate(order):
@@ -98,8 +125,8 @@ def main():
     patients = index.set_index("hospital_id").label.map(config.LABEL_TO_INT)
     subloc = index.set_index("hospital_id").sublocation.fillna("not recorded")
     clinical = pd.read_csv(OUT / "clinical_features.csv", index_col="hospital_id")
-    stats = {"clinical": {}, "selective": {}, "referred": {}}
-    pair_rows, clin_rows, ref_rows = [], [], []
+    stats = {"clinical": {}, "selective": {}, "referred": {}, "calibration": {}}
+    pair_rows, clin_rows, ref_rows, cal_rows = [], [], [], []
     for split, run in RUNS.items():
         df = pd.read_csv(OUT / f"{run}_patients.csv")
         clin = clinical_split(patients, clinical, split, df.set_index("hospital_id").outer_fold.to_dict())
@@ -119,8 +146,13 @@ def main():
             r = res[(a, b)][k]
             pair_rows.append({"split": split, "model_a": a, "model_b": b, "metric": k, "diff": r["diff"],
                               "ci_low": r["ci95"][0], "ci_high": r["ci95"][1], "p": r["p"], "p_holm": p_h})
-        # 3. selective classification at the primary coverage
         inner = pd.read_csv(OUT / f"{run}_inner_oof.csv")
+        # 5. calibration
+        probs = {m: platt(df, inner, m) for m in CALIBRATED}
+        stats["calibration"][split] = {m: calibration(y, probs[m]) for m in CALIBRATED}
+        cal_rows.append(pd.DataFrame({"split": split, "hospital_id": df.hospital_id, "label": y,
+                                      **{f"p_{m}": probs[m] for m in CALIBRATED}}))
+        # 3. selective classification at the primary coverage
         kept = n26.select(df, inner, "fusion", n26.PRIMARY_COVERAGE)
         yk, sk, tk = kept.label.to_numpy(), kept.fusion_score.to_numpy(), kept.fusion_threshold.to_numpy()
         stats["selective"][split] = n21.metrics(yk, sk, tk) | {"ci95": n21.bootstrap_ci(yk, sk, tk),
@@ -139,6 +171,7 @@ def main():
     pd.concat(clin_rows).to_csv(OUT / "paper_clinical_patients.csv", index=False)
     refs = pd.DataFrame(ref_rows)
     refs.to_csv(OUT / "paper_referred.csv", index=False)
+    pd.concat(cal_rows).to_csv(OUT / "paper_calibration_patients.csv", index=False)
     (OUT / "paper_stats.json").write_text(json.dumps({k: {str(s): v for s, v in d.items()} for k, d in stats.items()},
                                                      indent=1))
 
@@ -168,6 +201,12 @@ def main():
     print("   sub-locations of the referred patients (all splits; a patient can be referred in several splits):")
     for (lab, sl), n in refs.groupby(["label", "sublocation"]).size().sort_values(ascending=False).items():
         print(f"     {'LVOT' if lab else 'RVOT'} {sl}: {n}")
+    print("\n5. calibration (Platt scaling on the inner out-of-fold scores), per split:")
+    for m in CALIBRATED:
+        print(f"   {m:8s} " + "  ".join(
+            f"[{s}] Brier {c[m]['brier']:.3f} slope {c[m]['slope']:.2f} intercept {c[m]['intercept']:+.2f} "
+            f"mean p {c[m]['mean_predicted']:.3f} (observed {c[m]['observed']:.3f})"
+            for s, c in stats["calibration"].items()))
     print("written", OUT / "paper_stats.json")
 
 
