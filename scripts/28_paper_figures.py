@@ -46,8 +46,9 @@ def coverage_figure():
         ax.set_title(title, fontsize=8.5)
         ax.invert_xaxis()
         ax.grid(axis="y", color="#EEEEEE", lw=0.6)
-    axes[0].legend(frameon=False, fontsize=7, loc="lower right")
-    fig.tight_layout()
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, fontsize=7, loc="lower center", ncol=3)
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
     fig.savefig(FIG / "fig_coverage.pdf")
     plt.close(fig)
 
