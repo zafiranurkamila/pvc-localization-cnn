@@ -54,9 +54,89 @@ def describe_value(v, depth=0, max_items=8):
         print(f"{pad}{type(v).__name__}: {str(v)[:100]}")
 
 
+def short(v):
+    """Compact description of one value: type, length or shape, and a preview."""
+    if hasattr(v, "shape"):
+        return f"{type(v).__name__}{tuple(v.shape)}"
+    if isinstance(v, dict):
+        return f"dict[{len(v)}]"
+    if isinstance(v, (list, tuple)):
+        inner = short(v[0]) if v else ""
+        return f"{type(v).__name__}[{len(v)}] of {inner}" if inner else f"{type(v).__name__}[0]"
+    return f"{type(v).__name__}={str(v)[:40]}"
+
+
+def scalar(v):
+    while isinstance(v, (list, tuple)) and len(v) == 1:
+        v = v[0]
+    return v if isinstance(v, (str, int, float, bool, type(None))) else short(v)
+
+
+def inspect_patients(obj):
+    """Top level = {patient id: {attribute: value}}: attributes, label counts and the ECG structure."""
+    ids = list(obj)
+    first = obj[ids[0]]
+    print(f"  {len(ids)} patients; attributes of {ids[0]}:")
+    for k, v in first.items():
+        print(f"    {k:22s} {short(v)}   e.g. {str(scalar(v))[:60]}")
+    for k in first:
+        vals = [scalar(p.get(k)) for p in obj.values()]
+        if all(isinstance(v, (str, int, float, bool, type(None))) for v in vals):
+            c = collections.Counter(vals)
+            if len(c) <= 30:
+                print(f"  {k}: {dict(c.most_common())}")
+            else:
+                print(f"  {k}: {len(c)} distinct values")
+    # nested ECG structure: walk the dict levels of every patient and collect key names and array shapes
+    for k, v in first.items():
+        if not isinstance(v, dict):
+            continue
+        print(f"\n  nested attribute {k!r}:")
+        levels = collections.defaultdict(collections.Counter)
+        shapes = collections.Counter()
+        n_arrays = []
+
+        def walk(x, depth):
+            count = 0
+            if isinstance(x, dict):
+                for kk, vv in x.items():
+                    levels[depth][kk] += 1
+                    count += walk(vv, depth + 1)
+            elif isinstance(x, (list, tuple)) and x and not hasattr(x[0], "shape") and isinstance(x[0], (dict, list)):
+                for vv in x:
+                    count += walk(vv, depth + 1)
+            elif hasattr(x, "shape") or (hasattr(x, "columns")):
+                shapes[str(tuple(x.shape)) + " " + type(x).__name__] += 1
+                count += 1
+            elif isinstance(x, (list, tuple)):
+                shapes[f"list[{len(x)}] of {short(x[0]) if x else ''}"] += 1
+                count += 1
+            return count
+
+        for p in obj.values():
+            if isinstance(p.get(k), dict):
+                n_arrays.append(walk(p[k], 1))
+        for d in sorted(levels):
+            print(f"    level {d}: {len(levels[d])} distinct keys, most common {levels[d].most_common(25)}")
+        print(f"    leaf shapes: {shapes.most_common(10)}")
+        if n_arrays:
+            print(f"    leaves (ECGs) per patient: min {min(n_arrays)}, median {sorted(n_arrays)[len(n_arrays) // 2]}, "
+                  f"max {max(n_arrays)}, total {sum(n_arrays)}")
+        print("    first patient, path to the first leaf:")
+        x, path = v, []
+        while isinstance(x, dict) and x:
+            kk = next(iter(x)); path.append(kk); x = x[kk]
+        print(f"      {' / '.join(map(str, path))} -> {short(x)}")
+        if hasattr(x, "columns"):
+            print(f"      columns {list(x.columns)}")
+
+
 def inspect_object(obj):
     import pandas as pd
     print(f"  top-level type: {type(obj).__name__}")
+    if isinstance(obj, dict) and obj and all(isinstance(v, dict) for v in list(obj.values())[:5]):
+        inspect_patients(obj)
+        return
     if not isinstance(obj, pd.DataFrame):
         describe_value(obj)
         return
