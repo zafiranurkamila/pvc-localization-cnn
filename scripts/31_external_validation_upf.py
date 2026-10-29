@@ -138,15 +138,19 @@ def develop(rec, feats, pid, labels, patients, clinical, device, ensemble, quick
     c_oof = pd.concat(parts)
     bar.set_postfix_str("cnn final models")
     b_all = n24.beats(pid, all_p)
-    c_models = [n21.train(feats, b_all, labels, "pvc", c_lr, c_do, c_ep, device, seed=SEED + k, progress=bar)[0].cpu()
-                for k in range(ensemble)]
+    # state dicts, not modules: the network class lives in a module loaded by path, which pickle cannot import
+    c_models = [{n: t.detach().cpu() for n, t in
+                 n21.train(feats, b_all, labels, "pvc", c_lr, c_do, c_ep, device, seed=SEED + k,
+                           progress=bar)[0].state_dict().items()} for k in range(ensemble)]
+    psd0, cwt0 = n21.inputs(feats, b_all[:1], "pvc")
+    c_shape = {"psd_len": int(psd0.shape[1]), "cwt_channels": int(cwt0.shape[1]), "dropout": c_do}
     bar.close()
 
     # clinical-criteria model on all patients, same inner folds
     cols = list(clinical.columns)
     clin_model, clin_C, _, clin_thr = n22.fit_logistic(clinical.reindex(all_p)[cols].to_numpy(), patients.to_numpy(),
                                                        inner)
-    return {"f_models": f_models, "c_models": c_models, "f_oof": f_oof, "c_oof": c_oof, "clin_model": clin_model,
+    return {"f_models": f_models, "c_models": c_models, "c_shape": c_shape, "f_oof": f_oof, "c_oof": c_oof, "clin_model": clin_model,
             "clin_thr": clin_thr, "clin_cols": cols,
             "settings": {"founder": {"learning_rate": f_lr, "epochs": f_ep, "inner_criterion_1seed": f_c},
                          "cnn": {"learning_rate": c_lr, "dropout": c_do, "epochs": c_ep, "inner_criterion_1seed": c_c},
@@ -227,7 +231,7 @@ def founder_scores(f_models, ext, device):
 
 
 @torch.no_grad()
-def cnn_scores(c_models, ext, device):
+def cnn_scores(c_states, c_shape, ext, device):
     hs = [h for h, e in ext.items() if e["pvc"]]
     beats = [(h, zscore_normalize(b)) for h in hs for b in ext[h]["pvc"]]
     t = lambda a: torch.tensor(np.stack(a), dtype=torch.float32, device=device)
@@ -235,7 +239,13 @@ def cnn_scores(c_models, ext, device):
              "cwt": t([extract_cwt_scalogram(b) for _, b in beats])}
     pid = np.array([h for h, _ in beats], dtype=object)
     idx = np.arange(len(beats))
-    m = np.mean([n21.margins(model.to(device), feats, idx, "pvc") for model in c_models], axis=0)
+    margins = []
+    for state in c_states:
+        model = n21.TwoBranchCNN(c_shape["psd_len"], c_shape["cwt_channels"], c_shape["dropout"],
+                                 psd12=n21.OPTS["psd12"]).to(device)
+        model.load_state_dict(state)
+        margins.append(n21.margins(model, feats, idx, "pvc"))
+    m = np.mean(margins, axis=0)
     return pd.Series(m).groupby(pid).mean()
 
 
@@ -275,7 +285,7 @@ def main():
 
     ext = external_inputs(args.pkl, args.quick)
     f_s = founder_scores(dev["f_models"], ext, device)
-    c_s = cnn_scores(dev["c_models"], ext, device)
+    c_s = cnn_scores(dev["c_models"], dev["c_shape"], ext, device)
     clin = clinical_features(ext)
     cl_s = pd.Series(dev["clin_model"].decision_function(clin[dev["clin_cols"]].to_numpy()), index=clin.index)
 
