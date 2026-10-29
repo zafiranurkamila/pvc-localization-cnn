@@ -87,9 +87,7 @@ def main():
     args = ap.parse_args()
     out = Path(args.pkl).parent / "inspect"
     out.mkdir(exist_ok=True)
-    print("loading (restricted unpickler) ...")
-    with open(args.pkl, "rb") as f:
-        data = n29.RestrictedUnpickler(f).load()
+    data = n29.load_pickle(args.pkl)
     ot = {h: p for h, p in data.items() if first(p.get("SOO_chamber")) in ("RVOT", "LVOT")}
     print(f"{len(ot)} outflow-tract patients: "
           f"{sum(first(p['SOO_chamber']) == 'RVOT' for p in ot.values())} RVOT, "

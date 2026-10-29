@@ -19,7 +19,6 @@ Output: printed report; the extracted all_points_may_2024.pkl and the two label 
 import argparse
 import collections
 import pickle
-import shutil
 import sys
 import zipfile
 from pathlib import Path
@@ -34,6 +33,40 @@ class RestrictedUnpickler(pickle.Unpickler):
         if module.split(".")[0] in SAFE_MODULES:
             return super().find_class(module, name)
         raise pickle.UnpicklingError(f"blocked import {module}.{name}")
+
+
+class ProgressFile:
+    """File wrapper that advances a tqdm bar by the bytes the unpickler reads."""
+
+    def __init__(self, f, bar):
+        self.f, self.bar = f, bar
+
+    def read(self, n=-1):
+        b = self.f.read(n); self.bar.update(len(b)); return b
+
+    def readline(self):
+        b = self.f.readline(); self.bar.update(len(b)); return b
+
+    def readinto(self, buf):
+        n = self.f.readinto(buf); self.bar.update(n or 0); return n
+
+
+def load_pickle(path):
+    """Load a pickle with the restricted unpickler, with a progress bar over the bytes read."""
+    from tqdm import tqdm
+    path = Path(path)
+    with open(path, "rb") as f, tqdm(total=path.stat().st_size, unit="B", unit_scale=True, unit_divisor=1024,
+                                     desc=f"loading {path.name}") as bar:
+        return RestrictedUnpickler(ProgressFile(f, bar)).load()
+
+
+def extract(z, info, out):
+    """Stream one zip member to disk with a progress bar."""
+    from tqdm import tqdm
+    with z.open(info) as src, open(out, "wb") as dst, tqdm(total=info.file_size, unit="B", unit_scale=True,
+                                                           unit_divisor=1024, desc=f"extracting {out.name}") as bar:
+        while chunk := src.read(16 << 20):
+            dst.write(chunk); bar.update(len(chunk))
 
 
 def describe_value(v, depth=0, max_items=8):
@@ -185,15 +218,11 @@ def main():
                 if i.filename.endswith((".pkl", ".xlsx")):
                     out = path.parent / Path(i.filename).name
                     if not out.exists():
-                        print(f"extracting {i.filename} -> {out}")
-                        with z.open(i) as src, open(out, "wb") as dst:
-                            shutil.copyfileobj(src, dst, length=16 << 20)
+                        extract(z, i, out)
                     if out.suffix == ".pkl":
                         pkl = out
-    print(f"\nloading {pkl.name} with the restricted unpickler ...")
     try:
-        with open(pkl, "rb") as f:
-            obj = RestrictedUnpickler(f).load()
+        obj = load_pickle(pkl)
     except pickle.UnpicklingError as e:
         sys.exit(f"  not loaded: {e}")
     inspect_object(obj)
