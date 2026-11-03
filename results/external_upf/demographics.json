@@ -1,0 +1,40 @@
+{
+ "outflow_tract_112": {
+  "patients": 112,
+  "men": 49,
+  "women": 60,
+  "sex_missing": 3,
+  "age_mean": 52.1,
+  "age_sd": 14.6,
+  "age_missing": 4
+ },
+ "analysis_106": {
+  "patients": 106,
+  "men": 47,
+  "women": 57,
+  "sex_missing": 2,
+  "age_mean": 51.7,
+  "age_sd": 13.7,
+  "age_missing": 3
+ },
+ "analysis_106_by_side": {
+  "RVOT": {
+   "patients": 74,
+   "men": 27,
+   "women": 46,
+   "sex_missing": 1,
+   "age_mean": 48.7,
+   "age_sd": 12.6,
+   "age_missing": 1
+  },
+  "LVOT": {
+   "patients": 32,
+   "men": 20,
+   "women": 11,
+   "sex_missing": 1,
+   "age_mean": 58.8,
+   "age_sd": 14.1,
+   "age_missing": 2
+  }
+ }
+}
