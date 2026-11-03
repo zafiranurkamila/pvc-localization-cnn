@@ -6,6 +6,8 @@ dan Power Spectrum Density dalam Model CNN untuk Lokalisasi PVC (RVOT vs LVOT)*.
 Dataset: Zheng, J. — *A 12-Lead ECG Database to Identify Origins of Idiopathic
 Ventricular Arrhythmia* (334 patients), via Figshare.
 
+> **Journal of Medical Systems article:** see [docs/JOMS_REPRODUCIBILITY.md](docs/JOMS_REPRODUCIBILITY.md) for data access, setup, seeds, the commands behind every table and the commits that fixed the pre-specified analyses.
+
 ## Setup
 
 ```bash
