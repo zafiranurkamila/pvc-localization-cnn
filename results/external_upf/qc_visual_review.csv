@@ -1,0 +1,21 @@
+patient,side,strips,flagged_beats,flagged_pvc,flagged_not_pvc,missed_pvc,note,flagged_qc_input,kept_by_qc
+P108,RVOT,4,4,4,0,2,strip P43 is a run of wide beats; two of them not flagged,4,4
+P271,RVOT,4,5,4,1,0,strip P56: flagged mark is on the T wave; no PVC in that strip,5,5
+P195,RVOT,4,5,1,4,0,strips P22 P15 P7 contain no PVC; narrow beats (30 ms) flagged,5,1
+P058,RVOT,4,4,4,0,0,,4,4
+P274,RVOT,4,9,9,0,0,strip P175 is a run of four PVCs,9,9
+P078,RVOT,4,6,1,5,0,strips P42 P1 P4 contain no PVC; strip P16 beat at 2.0 s (index 52) uncertain,6,1
+P224,RVOT,4,6,6,0,0,,6,6
+P244,RVOT,4,5,5,0,0,strip P57 beat at 0.74 s (index 42) uncertain,5,5
+P037,RVOT,4,4,4,0,0,,4,4
+P189,RVOT,4,4,4,0,0,,4,4
+P286,LVOT,4,6,5,1,0,strip P24: narrow beat flagged; wide negative deflection at 1.3 s in lead II not detected (possible PVC or artefact),6,5
+P291,LVOT,4,9,3,6,2,noisy low-amplitude strips: small beats get large indices; in strips P65 and P102 the wide beat is missed and small beats are flagged,9,9
+P255,LVOT,4,4,2,2,0,noisy lead II; strips P25 and P4 show two similar beats at a regular interval; strip P12 beat at 1.91 s uncertain,4,2
+P285,LVOT,4,6,6,0,0,,6,6
+P124,LVOT,4,4,4,0,0,strip P138: one detection at 0.88 s is noise (not flagged),4,4
+P027,LVOT,4,3,0,3,0,no PVC in the four strips; narrow beats (40-46 ms) flagged,3,0
+P182,LVOT,4,3,2,1,0,strip P27 contains no PVC,3,2
+P085,LVOT,4,6,1,5,0,strips P98 P93 P108 contain no PVC; strip P37 flagged beat follows a wide beat at the strip edge (possible couplet),6,1
+P179,LVOT,4,7,0,7,0,no PVC in the four strips; narrow beats (24 ms) flagged,7,0
+P095,LVOT,4,4,4,0,0,,4,4

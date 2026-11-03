@@ -1,0 +1,199 @@
+{
+ "rule": {
+  "w_min_ms": 67.03,
+  "definition": "flagged and width index >= 1st percentile of the patient-median flagged width of the first cohort"
+ },
+ "extraction": {
+  "all": {
+   "patients": 112,
+   "strips": 2980,
+   "strips_with_flagged_beat": 2862,
+   "strips_with_kept_beat": 2014,
+   "flagged_beats": 3257,
+   "kept_beats": 2206,
+   "patients_with_flagged_beat": 106,
+   "patients_with_kept_beat": 102
+  },
+  "RVOT": {
+   "patients": 76,
+   "strips": 2098,
+   "strips_with_flagged_beat": 2014,
+   "strips_with_kept_beat": 1422,
+   "flagged_beats": 2320,
+   "kept_beats": 1587,
+   "patients_with_flagged_beat": 74,
+   "patients_with_kept_beat": 74
+  },
+  "LVOT": {
+   "patients": 36,
+   "strips": 882,
+   "strips_with_flagged_beat": 848,
+   "strips_with_kept_beat": 592,
+   "flagged_beats": 937,
+   "kept_beats": 619,
+   "patients_with_flagged_beat": 32,
+   "patients_with_kept_beat": 28
+  }
+ },
+ "visual_review": {
+  "patients": 20,
+  "flagged": 104,
+  "kept_by_qc": 76,
+  "reviewed_pvc": 69,
+  "reviewed_not_pvc": 35
+ },
+ "sensitivity_unchanged": {
+  "fusion": {
+   "original_106": {
+    "macro_f1": 0.6839251829764164,
+    "balanced_accuracy": 0.7592905405405406,
+    "sensitivity": 0.9375,
+    "specificity": 0.581081081081081,
+    "auc": 0.8610641891891891,
+    "patients": 106,
+    "lvot": 32
+   },
+   "original_same_patients": {
+    "macro_f1": 0.67836026803311,
+    "balanced_accuracy": 0.7726833976833977,
+    "sensitivity": 0.9642857142857143,
+    "specificity": 0.581081081081081,
+    "auc": 0.8827220077220077,
+    "patients": 102,
+    "lvot": 28
+   },
+   "qc_beats": {
+    "macro_f1": 0.7004556962025317,
+    "balanced_accuracy": 0.7707528957528957,
+    "sensitivity": 0.8928571428571429,
+    "specificity": 0.6486486486486487,
+    "auc": 0.8986486486486486,
+    "patients": 102,
+    "lvot": 28
+   }
+  },
+  "founder": {
+   "original_106": {
+    "macro_f1": 0.7185457516339869,
+    "balanced_accuracy": 0.7267736486486487,
+    "sensitivity": 0.65625,
+    "specificity": 0.7972972972972973,
+    "auc": 0.8538851351351351,
+    "patients": 106,
+    "lvot": 32
+   },
+   "original_same_patients": {
+    "macro_f1": 0.7495535714285715,
+    "balanced_accuracy": 0.7736486486486487,
+    "sensitivity": 0.75,
+    "specificity": 0.7972972972972973,
+    "auc": 0.8807915057915058,
+    "patients": 102,
+    "lvot": 28
+   },
+   "qc_beats": {
+    "macro_f1": 0.7495535714285715,
+    "balanced_accuracy": 0.7736486486486487,
+    "sensitivity": 0.75,
+    "specificity": 0.7972972972972973,
+    "auc": 0.8807915057915058,
+    "patients": 102,
+    "lvot": 28
+   }
+  },
+  "cnn": {
+   "original_106": {
+    "macro_f1": 0.6717610628308861,
+    "balanced_accuracy": 0.6841216216216216,
+    "sensitivity": 0.625,
+    "specificity": 0.7432432432432432,
+    "auc": 0.7913851351351351,
+    "patients": 106,
+    "lvot": 32
+   },
+   "original_same_patients": {
+    "macro_f1": 0.6584821428571428,
+    "balanced_accuracy": 0.6751930501930501,
+    "sensitivity": 0.6071428571428571,
+    "specificity": 0.7432432432432432,
+    "auc": 0.7934362934362934,
+    "patients": 102,
+    "lvot": 28
+   },
+   "qc_beats": {
+    "macro_f1": 0.7538610038610039,
+    "balanced_accuracy": 0.7538610038610039,
+    "sensitivity": 0.6428571428571429,
+    "specificity": 0.8648648648648649,
+    "auc": 0.862934362934363,
+    "patients": 102,
+    "lvot": 28
+   }
+  },
+  "clinical": {
+   "original_106": {
+    "macro_f1": 0.590425030628593,
+    "balanced_accuracy": 0.6165540540540541,
+    "sensitivity": 0.625,
+    "specificity": 0.6081081081081081,
+    "auc": 0.6849662162162162,
+    "patients": 106,
+    "lvot": 32
+   },
+   "original_same_patients": {
+    "macro_f1": 0.5626895325734602,
+    "balanced_accuracy": 0.5897683397683398,
+    "sensitivity": 0.5714285714285714,
+    "specificity": 0.6081081081081081,
+    "auc": 0.6833976833976834,
+    "patients": 102,
+    "lvot": 28
+   },
+   "qc_beats": {
+    "macro_f1": 0.7578408096963638,
+    "balanced_accuracy": 0.7495173745173744,
+    "sensitivity": 0.6071428571428571,
+    "specificity": 0.8918918918918919,
+    "auc": 0.778957528957529,
+    "patients": 102,
+    "lvot": 28
+   }
+  }
+ },
+ "subsets": {
+  "with_kept_beat": {
+   "unchanged_fusion": {
+    "macro_f1": 0.67836026803311,
+    "balanced_accuracy": 0.7726833976833977,
+    "sensitivity": 0.9642857142857143,
+    "specificity": 0.581081081081081,
+    "auc": 0.8827220077220077,
+    "patients": 102,
+    "lvot": 28
+   },
+   "adapted_fusion": {
+    "macro_f1": 0.8841435711040436,
+    "balanced_accuracy": 0.9102316602316602,
+    "sensitivity": 0.9285714285714286,
+    "specificity": 0.8918918918918919,
+    "auc": 0.9276061776061776,
+    "patients": 102,
+    "lvot": 28
+   },
+   "errors_unchanged": 32,
+   "errors_adapted": 10
+  },
+  "without_kept_beat": {
+   "unchanged_fusion": {
+    "patients": 4,
+    "lvot": 4
+   },
+   "adapted_fusion": {
+    "patients": 4,
+    "lvot": 4
+   },
+   "errors_unchanged": 1,
+   "errors_adapted": 1
+  }
+ }
+}
