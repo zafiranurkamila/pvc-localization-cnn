@@ -1,0 +1,31 @@
+split,comparison,group,patients,correct_only_cnn,correct_only_founder,both_wrong,mcnemar_p,correct_only_fusion
+42,cnn vs founder,all,329,11.0,20,15,0.14961278438568115,
+42,cnn vs founder,LVOT,75,5.0,10,6,0.30175781249999994,
+42,cnn vs founder,RVOT,254,6.0,10,9,0.454498291015625,
+42,cnn vs founder,ECGFounder uncertain (lowest third),110,9.0,12,11,0.6636238098144531,
+42,cnn vs founder,ECGFounder certain,219,2.0,8,4,0.109375,
+42,fusion vs founder,all,329,,5,21,1.0,5.0
+42,fusion vs founder,LVOT,75,,1,9,1.0,2.0
+42,fusion vs founder,RVOT,254,,4,12,1.0,3.0
+42,fusion vs founder,ECGFounder uncertain (lowest third),110,,5,15,1.0,5.0
+42,fusion vs founder,ECGFounder certain,219,,0,6,1.0,0.0
+7,cnn vs founder,all,329,13.0,18,13,0.47312965989112854,
+7,cnn vs founder,LVOT,75,6.0,9,5,0.6072387695312499,
+7,cnn vs founder,RVOT,254,7.0,9,8,0.803619384765625,
+7,cnn vs founder,ECGFounder uncertain (lowest third),110,9.0,10,7,1.0,
+7,cnn vs founder,ECGFounder certain,219,4.0,8,6,0.3876953125,
+7,fusion vs founder,all,329,,6,21,1.0,5.0
+7,fusion vs founder,LVOT,75,,5,9,0.453125,2.0
+7,fusion vs founder,RVOT,254,,1,12,0.625,3.0
+7,fusion vs founder,ECGFounder uncertain (lowest third),110,,6,11,1.0,5.0
+7,fusion vs founder,ECGFounder certain,219,,0,10,1.0,0.0
+123,cnn vs founder,all,329,11.0,20,19,0.14961278438568115,
+123,cnn vs founder,LVOT,75,4.0,7,13,0.548828125,
+123,cnn vs founder,RVOT,254,7.0,13,6,0.26317596435546875,
+123,cnn vs founder,ECGFounder uncertain (lowest third),110,10.0,8,10,0.8145294189453125,
+123,cnn vs founder,ECGFounder certain,219,1.0,12,9,0.00341796875,
+123,fusion vs founder,all,329,,7,23,1.0,7.0
+123,fusion vs founder,LVOT,75,,0,12,0.0625,5.0
+123,fusion vs founder,RVOT,254,,7,11,0.1796875,2.0
+123,fusion vs founder,ECGFounder uncertain (lowest third),110,,6,13,1.0,7.0
+123,fusion vs founder,ECGFounder certain,219,,1,10,1.0,0.0
