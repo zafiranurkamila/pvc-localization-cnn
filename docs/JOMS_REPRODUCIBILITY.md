@@ -62,6 +62,7 @@ python scripts/23_nested_cv_ecgfounder.py --check
 | (ii) Local recalibration, (iii) local model adaptation | `python scripts/32_multicentre_upf.py data/external/otva_upf/all_points_may_2024.pkl` | Table 7 |
 | Fusion vs ECGFounder at equal coverage | `python scripts/33_fusion_vs_founder.py` | Results 3.2, Table S3 |
 | Visual review of the second cohort | `python scripts/34_upf_visual_review.py data/external/otva_upf/all_points_may_2024.pkl`, then `--summarize` | Methods 2.5 |
+| Sex and age of the second cohort, errors by sex | `python scripts/36_upf_demographics.py data/external/otva_upf/all_points_may_2024.pkl` | Methods 2.5, Supplementary results |
 | Criteria applied directly, errors, recording length, trade-off | `python scripts/35_priority2_analyses.py` | Tables S2, S4, S5, S7--S9 |
 
 Scripts 33 and 35 use only saved predictions (no GPU). The development runs of Table S1 are the earlier result files
