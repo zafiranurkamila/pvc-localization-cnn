@@ -1,7 +1,7 @@
 """Single-column version of the PVC-extraction example figure for the paper (patient 822228, LVOT).
 
 Same content as the review figures of scripts/18_pvc_extraction_check.py, laid out for one journal column
-(3.45 in wide): (a) lead II with the flagged PVCs, (b) sorted QRS widths, (c) overlay of lead II, (d) overlay of V1.
+(3.45 in wide): (a) lead II with the flagged PVCs, (b) sorted QRS-width indices, (c) overlay of lead II, (d) overlay of V1.
 Needs data/processed (run on the PC).
 
 Usage:
@@ -53,8 +53,8 @@ def main():
     ax = fig.add_subplot(gs[1, :])
     order = np.argsort(widths)
     ax.bar(range(len(widths)), widths[order], color=["red" if wide[j] else "tab:blue" for j in order])
-    ax.set_xlabel("Beats sorted by QRS width")
-    ax.set_ylabel("QRS width (ms)")
+    ax.set_xlabel("Beats sorted by QRS-width index")
+    ax.set_ylabel("QRS-width index (ms)")
     ax.set_xticks([])
     ax.text(-0.11, 1.0, "(b)", transform=ax.transAxes, fontweight="bold", va="top")
 

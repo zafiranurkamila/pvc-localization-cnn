@@ -32,7 +32,7 @@ plt.rcParams.update({"font.family": "serif", "font.size": 8, "axes.spines.top": 
 
 def coverage_figure():
     res = pd.read_csv(OUT / "selective.csv")
-    fig, axes = plt.subplots(1, 2, figsize=(6.6, 2.6), sharex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(5.15, 2.5), sharex=True)  # full text width of the article (13.1 cm)
     for ax, metric, title in zip(axes, ("macro_f1", "balanced_accuracy"), ("Macro F1-score", "Balanced accuracy")):
         for m, (label, color, marker) in MODELS.items():
             g = res[res.model == m].groupby("target_coverage").agg(cov=("coverage", "mean"), mean=(metric, "mean"),
@@ -47,8 +47,8 @@ def coverage_figure():
         ax.invert_xaxis()
         ax.grid(axis="y", color="#EEEEEE", lw=0.6)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, frameon=False, fontsize=7, loc="lower center", ncol=3)
-    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.legend(handles, labels, frameon=False, fontsize=7.5, loc="lower center", ncol=3)
+    fig.tight_layout(rect=(0, 0.09, 1, 1))
     fig.savefig(FIG / "fig_coverage.pdf")
     plt.close(fig)
 
