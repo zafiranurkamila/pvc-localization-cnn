@@ -1,12 +1,26 @@
-# PVC Localization — HOS vs Wavelet vs PSD Feature Comparison (CNN)
+# PVC origin localization (RVOT vs LVOT) from the 12-lead ECG
+
+Code of the article *Premature Ventricular Contraction Origin Localization with a Fine-Tuned ECG Foundation Model and
+Referral of Uncertain Cases* (Z. N. Kamila, S. Mandala; submitted to the Journal of Medical Systems).
+
+- **Model:** fine-tuned ECGFounder fused with a PSD + CWT CNN of the automatically extracted PVC beats; patients whose
+  score lies close to the threshold are referred (no estimate).
+- **Evaluation:** nested patient-level cross-validation on three splits of 329 patients (Zheng et al., public), and a
+  second cohort of 106 patients (UPF, Barcelona): unchanged, after local recalibration and after local model adaptation.
+- **Reproduction:** [docs/JOMS_REPRODUCIBILITY.md](docs/JOMS_REPRODUCIBILITY.md) lists data access, setup, seeds, the
+  command behind every table and figure, and the commits that fixed the pre-specified analyses before their results.
+- **Main scripts:** `scripts/21`–`28` (first cohort), `scripts/29`–`32` (second cohort), `scripts/33`–`36` (analyses
+  without retraining). Trained weights are available from the corresponding author on reasonable request.
+
+---
+
+## Earlier work: HOS vs Wavelet vs PSD feature comparison (CNN)
 
 TA: *Analisis dan Perbandingan Efektivitas Fitur Higher-Order Statistics, Wavelet,
 dan Power Spectrum Density dalam Model CNN untuk Lokalisasi PVC (RVOT vs LVOT)*.
 
 Dataset: Zheng, J. — *A 12-Lead ECG Database to Identify Origins of Idiopathic
 Ventricular Arrhythmia* (334 patients), via Figshare.
-
-> **Journal of Medical Systems article:** see [docs/JOMS_REPRODUCIBILITY.md](docs/JOMS_REPRODUCIBILITY.md) for data access, setup, seeds, the commands behind every table and the commits that fixed the pre-specified analyses.
 
 ## Setup
 
