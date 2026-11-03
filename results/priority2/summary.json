@@ -1,0 +1,92 @@
+{
+ "clinical_rule_counts": {
+  "no sinus beat (V2TR not measurable)": 0,
+  "PVC transition in V3": 97
+ },
+ "clinical_rules": [
+  {
+   "rule": "V2 transition ratio >= 0.60",
+   "group": "all measurable",
+   "n": 329,
+   "lvot": 75,
+   "macro_f1": 0.5739659837649788,
+   "balanced_accuracy": 0.6798425196850393,
+   "sensitivity": 0.84,
+   "specificity": 0.5196850393700787,
+   "accuracy": 0.5927051671732523,
+   "macro_f1_ci": [
+    0.5215732096903435,
+    0.6287234484484651
+   ],
+   "balanced_accuracy_ci": [
+    0.624095106414498,
+    0.7291616757403611
+   ],
+   "fusion_macro_f1": 0.8825364359722228,
+   "fusion_balanced_accuracy": 0.8891601049868766
+  },
+  {
+   "rule": "V2 transition ratio >= 0.60",
+   "group": "PVC transition in V3",
+   "n": 97,
+   "lvot": 21,
+   "macro_f1": 0.5019119414399651,
+   "balanced_accuracy": 0.6218671679197996,
+   "sensitivity": 0.8095238095238095,
+   "specificity": 0.4342105263157895,
+   "accuracy": 0.5154639175257731,
+   "macro_f1_ci": [
+    0.40224089635854343,
+    0.6016415619899225
+   ],
+   "balanced_accuracy_ci": [
+    0.5194952806548614,
+    0.7172739541160593
+   ],
+   "fusion_macro_f1": 0.823142182127107,
+   "fusion_balanced_accuracy": 0.8441938178780285
+  },
+  {
+   "rule": "V2S/V3R index <= 1.5",
+   "group": "all measurable",
+   "n": 329,
+   "lvot": 75,
+   "macro_f1": 0.7874677002583979,
+   "balanced_accuracy": 0.8185301837270341,
+   "sensitivity": 0.7866666666666666,
+   "specificity": 0.8503937007874016,
+   "accuracy": 0.8358662613981763,
+   "macro_f1_ci": [
+    0.737675414616366,
+    0.836171473177593
+   ],
+   "balanced_accuracy_ci": [
+    0.7689131376117898,
+    0.8679484723138606
+   ],
+   "fusion_macro_f1": 0.8825364359722228,
+   "fusion_balanced_accuracy": 0.8891601049868766
+  },
+  {
+   "rule": "V2S/V3R index <= 1.5",
+   "group": "PVC transition in V3",
+   "n": 97,
+   "lvot": 21,
+   "macro_f1": 0.6591542469405065,
+   "balanced_accuracy": 0.7402882205513784,
+   "sensitivity": 0.8095238095238095,
+   "specificity": 0.6710526315789473,
+   "accuracy": 0.7010309278350515,
+   "macro_f1_ci": [
+    0.5570749637776606,
+    0.7570661896243291
+   ],
+   "balanced_accuracy_ci": [
+    0.6298892221362229,
+    0.835702824619297
+   ],
+   "fusion_macro_f1": 0.823142182127107,
+   "fusion_balanced_accuracy": 0.8441938178780285
+  }
+ ]
+}

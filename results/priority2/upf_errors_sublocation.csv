@@ -1,0 +1,9 @@
+group,patients,errors_unchanged,errors_adapted,referred_adapted_90
+LVOT: L-R cusp commissure,12,2,2,1
+LVOT: left coronary cusp,9,0,0,1
+LVOT: other or not specified,1,0,0,0
+LVOT: right coronary cusp,9,0,1,2
+LVOT: summit,1,0,0,0
+RVOT: free wall,23,4,1,1
+RVOT: other or not specified,15,7,3,0
+RVOT: septal,36,20,4,4
