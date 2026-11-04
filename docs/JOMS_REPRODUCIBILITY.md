@@ -48,7 +48,8 @@ python scripts/23_nested_cv_ecgfounder.py --check
 | Step | Command | Article |
 |---|---|---|
 | Label index | `python scripts/01_build_label_index.py` | Methods 2.1, Table 2 |
-| Beat extraction and PSD/CWT | `python scripts/03_full_segmentation.py` | Methods 2.1, Figure 1 |
+| Beat extraction and PSD/CWT | `python scripts/03_full_segmentation.py` | Methods 2.1 |
+| Extraction example | `python scripts/19_paper_fig_extraction.py` | Figure 1 |
 | Sinus templates | `python scripts/20_sinus_beats.py` | ECG criteria |
 | ECG criteria (features) | `python scripts/22_nested_cv_clinical_stack.py --features-only` | Methods 2.2 |
 | Nested CV, split 42 | `python scripts/24_nested_cv_fusion.py --psd12 --augment --wd 0.0001 --ensemble 5` | Tables 4, 5 |
@@ -64,8 +65,11 @@ python scripts/23_nested_cv_ecgfounder.py --check
 | Visual review of the second cohort | `python scripts/34_upf_visual_review.py data/external/otva_upf/all_points_may_2024.pkl`, then `--summarize` | Methods 2.5 |
 | Sex and age of the second cohort, errors by sex | `python scripts/36_upf_demographics.py data/external/otva_upf/all_points_may_2024.pkl` | Methods 2.5, Supplementary results |
 | Criteria applied directly, errors, recording length, trade-off | `python scripts/35_priority2_analyses.py` | Tables S2, S4, S5, S7--S9 |
+| Fusion vs ECGFounder at equal realized coverage | `python scripts/37_fusion_vs_founder_realized.py` | Results 3.2, Table S3 (B) |
+| QC of the second-cohort extraction (sensitivity analysis) | `python scripts/38_upf_extraction_qc.py data/external/otva_upf/all_points_may_2024.pkl` | Methods 2.5, Results 3.4, Supplementary results |
 
-Scripts 33 and 35 use only saved predictions (no GPU). The development runs of Table S1 are the earlier result files
+Scripts 33, 35 and 37 use only saved predictions (no GPU); script 38 re-scores the second cohort with the stored
+development models of (i) (`data/interim/external_final/development_ens5.pt`, written by script 31), without training. The development runs of Table S1 are the earlier result files
 in `results/nested_cv/` (split 42).
 
 ## Pre-specified analyses (commits made before the results were computed)
@@ -79,7 +83,8 @@ in `results/nested_cv/` (split 42).
 | Second cohort, local recalibration and local model adaptation | `faaa8d7` | 2026-10-29 |
 
 Analyses added after the review of the draft (no model retrained): `scripts/33` (commit `3e46563`), `scripts/34`
-and its completed form (`a44eac5`), `scripts/35` (`fc14b5e`).
+and its completed form (`a44eac5`), `scripts/35` (`fc14b5e`), `scripts/36` (`2309566`), `scripts/37` and `scripts/38`
+(`f57f6bc`, results `b80fe01`).
 
 ## Outputs
 

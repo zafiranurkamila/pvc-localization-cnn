@@ -9,8 +9,9 @@ Referral of Uncertain Cases* (Z. N. Kamila, S. Mandala; submitted to the Journal
   second cohort of 106 patients (UPF, Barcelona): unchanged, after local recalibration and after local model adaptation.
 - **Reproduction:** [docs/JOMS_REPRODUCIBILITY.md](docs/JOMS_REPRODUCIBILITY.md) lists data access, setup, seeds, the
   command behind every table and figure, and the commits that fixed the pre-specified analyses before their results.
-- **Main scripts:** `scripts/21`–`28` (first cohort), `scripts/29`–`32` (second cohort), `scripts/33`–`36` (analyses
-  without retraining). Trained weights are available from the corresponding author on reasonable request.
+- **Main scripts:** `scripts/21`–`28` (first cohort), `scripts/29`–`32` (second cohort), `scripts/33`–`38` (analyses
+  without retraining). Weights of the final models developed on the first cohort (applied unchanged to the second) are available from the corresponding author on reasonable request;
+  the models of the nested cross-validation and of local model adaptation were not stored and are reproduced with the code and the fixed seeds.
 
 ---
 
