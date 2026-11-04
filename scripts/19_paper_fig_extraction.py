@@ -48,7 +48,7 @@ def main():
     ax.set_xlabel("Time (s)")
     ax.set_ylabel(f"Lead {config.RPEAK_DETECTION_LEAD}")
     ax.margins(x=0.01, y=0.25)
-    ax.text(-0.11, 1.0, "(a)", transform=ax.transAxes, fontweight="bold", va="top")
+    ax.text(-0.2, 1.0, "(a)", transform=ax.transAxes, fontweight="bold", va="top")
 
     ax = fig.add_subplot(gs[1, :])
     order = np.argsort(widths)
@@ -56,7 +56,7 @@ def main():
     ax.set_xlabel("Beats sorted by QRS-width index")
     ax.set_ylabel("QRS-width index (ms)")
     ax.set_xticks([])
-    ax.text(-0.11, 1.0, "(b)", transform=ax.transAxes, fontweight="bold", va="top")
+    ax.text(-0.2, 1.0, "(b)", transform=ax.transAxes, fontweight="bold", va="top")
 
     tt = np.arange(-config.BEAT_PRE_SAMPLES, config.BEAT_POST_SAMPLES) / FS * 1000
     for k, (lead, name) in enumerate([(REF, config.RPEAK_DETECTION_LEAD), (V1, "V1")]):
@@ -67,7 +67,7 @@ def main():
                         color="red" if wide[i] else "tab:blue", lw=0.5, alpha=0.6)
         ax.set_xlabel("ms from R peak")
         ax.set_ylabel(f"Lead {name}")
-        ax.text(-0.3, 1.0, f"({'cd'[k]})", transform=ax.transAxes, fontweight="bold", va="top")
+        ax.text(-0.42, 1.0, f"({'cd'[k]})", transform=ax.transAxes, fontweight="bold", va="top")
 
     out = check18.OUT / "paper_fig_extraction"
     fig.savefig(out.with_suffix(".png"), dpi=600)
