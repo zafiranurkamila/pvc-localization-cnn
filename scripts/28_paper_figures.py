@@ -27,7 +27,8 @@ FIG = OUT / "figures"
 MODELS = {"fusion": ("Fusion (proposed)", "#0F6E78", "o"), "founder": ("ECGFounder", "#D17A22", "s"),
           "cnn": ("PSD--CWT CNN".replace("--", "–"), "#7A7A7A", "^")}
 PRIMARY = 0.90
-plt.rcParams.update({"font.family": "serif", "font.size": 8, "axes.spines.top": False, "axes.spines.right": False})
+plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
+                     "pdf.fonttype": 42, "font.size": 8, "axes.spines.top": False, "axes.spines.right": False})
 
 
 def coverage_figure():
