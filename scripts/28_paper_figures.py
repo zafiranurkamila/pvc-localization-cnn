@@ -24,7 +24,7 @@ _spec.loader.exec_module(n21)
 
 OUT = n21.OUT
 FIG = OUT / "figures"
-MODELS = {"fusion": ("Fusion (proposed)", "#0F6E78", "o"), "founder": ("ECGFounder", "#D17A22", "s"),
+MODELS = {"fusion": ("HyFusion (proposed)", "#0F6E78", "o"), "founder": ("ECGFounder", "#D17A22", "s"),
           "cnn": ("PSD--CWT CNN".replace("--", "–"), "#7A7A7A", "^")}
 PRIMARY = 0.90
 plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
