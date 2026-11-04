@@ -42,7 +42,7 @@ def main():
         c = "red" if wide[i] else "tab:blue"
         ax.plot(t[p], sig[p], "v" if wide[i] else "o", color=c, ms=3)
         ax.annotate(f"{widths[i]:.0f}", (t[p], sig[p]), textcoords="offset points", xytext=(0, 4),
-                    ha="center", fontsize=5, color=c)
+                    ha="center", fontsize=5.5, color=c)  # about 8 pt at the column width
         if wide[i] and kept[i]:
             ax.axvspan(t[p] - config.BEAT_PRE_MS / 1000, t[p] + config.BEAT_POST_MS / 1000, color="red", alpha=0.07, lw=0)
     ax.set_xlabel("Time (s)")

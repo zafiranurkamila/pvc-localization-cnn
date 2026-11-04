@@ -28,7 +28,7 @@ MODELS = {"fusion": ("HyFusion (proposed)", "#0F6E78", "o"), "founder": ("ECGFou
           "cnn": ("PSD--CWT CNN".replace("--", "–"), "#7A7A7A", "^")}
 PRIMARY = 0.90
 plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
-                     "pdf.fonttype": 42, "font.size": 8, "axes.spines.top": False, "axes.spines.right": False})
+                     "pdf.fonttype": 42, "font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
 
 
 def coverage_figure():
@@ -44,12 +44,12 @@ def coverage_figure():
             ax.scatter(100 * p["cov"], p["mean"], s=70, facecolor="none", edgecolor=color, lw=1.2, zorder=3)
         ax.axhline(0.9, color="#BBBBBB", lw=0.8, ls="--", zorder=0)
         ax.set_xlabel("Patients classified (%)")
-        ax.set_title(title, fontsize=8.5)
+        ax.set_title(title, fontsize=9.5)
         ax.invert_xaxis()
         ax.grid(axis="y", color="#EEEEEE", lw=0.6)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, frameon=False, fontsize=7.5, loc="lower center", ncol=3)
-    fig.tight_layout(rect=(0, 0.09, 1, 1))
+    fig.legend(handles, labels, frameon=False, fontsize=9, loc="lower center", ncol=3)
+    fig.tight_layout(rect=(0, 0.1, 1, 1))
     fig.savefig(FIG / "fig_coverage.pdf")
     plt.close(fig)
 
@@ -65,7 +65,7 @@ def calibration_figure():
     ax.set_xlabel("Predicted LVOT probability")
     ax.set_ylabel("Observed LVOT proportion")
     ax.set_xlim(0, 1); ax.set_ylim(0, 1)
-    ax.legend(frameon=False, fontsize=7, loc="upper left")
+    ax.legend(frameon=False, fontsize=8.5, loc="upper left")
     fig.tight_layout()
     fig.savefig(FIG / "fig_calibration.pdf")
     plt.close(fig)
