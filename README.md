@@ -1,7 +1,7 @@
 # PVC origin localization (RVOT vs LVOT) from the 12-lead ECG
 
-Code of the article *Premature Ventricular Contraction Origin Localization with a Fine-Tuned ECG Foundation Model and
-Referral of Uncertain Cases* (Z. N. Kamila, S. Mandala; submitted to the Journal of Medical Systems).
+Code of the article *HyFusion: Efficient Fusion of a Fine-Tuned ECG Foundation Model and a Spectral CNN with Selective Classification for Premature Ventricular Contraction Origin Localization* (Z. N. Kamila, S. Mandala; submitted to The Journal of Supercomputing, transferred
+from the Journal of Medical Systems).
 
 - **Model:** fine-tuned ECGFounder fused with a PSD + CWT CNN of the automatically extracted PVC beats; patients whose
   score lies close to the threshold are referred (no estimate).
@@ -10,7 +10,7 @@ Referral of Uncertain Cases* (Z. N. Kamila, S. Mandala; submitted to the Journal
 - **Reproduction:** [docs/JOMS_REPRODUCIBILITY.md](docs/JOMS_REPRODUCIBILITY.md) lists data access, setup, seeds, the
   command behind every table and figure, and the commits that fixed the pre-specified analyses before their results.
 - **Main scripts:** `scripts/21`–`28` (first cohort), `scripts/29`–`32` (second cohort), `scripts/33`–`38` (analyses
-  without retraining). Weights of the final models developed on the first cohort (applied unchanged to the second) are available from the corresponding author on reasonable request;
+  without retraining), `scripts/39` (computational cost: parameters, FLOPs, inference time, memory). Weights of the final models developed on the first cohort (applied unchanged to the second) are available from the corresponding author on reasonable request;
   the models of the nested cross-validation and of local model adaptation were not stored and are reproduced with the code and the fixed seeds.
 
 ---
