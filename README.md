@@ -7,7 +7,7 @@ from the Journal of Medical Systems).
   score lies close to the threshold are referred (no estimate).
 - **Evaluation:** nested patient-level cross-validation on three splits of 329 patients (Zheng et al., public), and a
   second cohort of 106 patients (UPF, Barcelona): unchanged, after local recalibration and after local model adaptation.
-- **Reproduction:** [docs/JOMS_REPRODUCIBILITY.md](docs/JOMS_REPRODUCIBILITY.md) lists data access, setup, seeds, the
+- **Reproduction:** [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) lists data access, setup, seeds, the
   command behind every table and figure, and the commits that fixed the pre-specified analyses before their results.
 - **Main scripts:** `scripts/21`–`28` (first cohort), `scripts/29`–`32` (second cohort), `scripts/33`–`38` (analyses
   without retraining), `scripts/39` (computational cost: parameters, FLOPs, inference time, memory), `scripts/40` (pilot optimisation
