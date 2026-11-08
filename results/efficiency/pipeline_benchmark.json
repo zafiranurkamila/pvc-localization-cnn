@@ -1,0 +1,67 @@
+{
+ "configs": {
+  "HyFusion_gpu": {
+   "median_ms": 228.02379995118827,
+   "q1_ms": 211.87917498173192,
+   "q3_ms": 241.98642506962642,
+   "median_ms_3_to_5_beats": 219.03865016065538,
+   "patients_3_to_5_beats": 18,
+   "peak_allocated_mb": 1248.68359375,
+   "peak_reserved_mb": 1770.0,
+   "resident_models_mb": 626.84521484375
+  },
+  "ECGFounder_gpu": {
+   "median_ms": 189.32890018913895,
+   "q1_ms": 173.59657486667857,
+   "q3_ms": 199.95109998853877,
+   "median_ms_3_to_5_beats": 182.32100014574826,
+   "patients_3_to_5_beats": 18,
+   "peak_allocated_mb": 920.041015625,
+   "peak_reserved_mb": 924.0,
+   "resident_models_mb": 626.84521484375
+  },
+  "HyFusion_cpu": {
+   "median_ms": 493.7749500386417,
+   "q1_ms": 372.0496249734424,
+   "q3_ms": 602.129224978853,
+   "median_ms_3_to_5_beats": 426.4346999116242,
+   "patients_3_to_5_beats": 18
+  },
+  "ECGFounder_cpu": {
+   "median_ms": 361.0972500173375,
+   "q1_ms": 260.0613249815069,
+   "q3_ms": 378.8851749850437,
+   "median_ms_3_to_5_beats": 267.6863500382751,
+   "patients_3_to_5_beats": 18
+  }
+ },
+ "check_gpu_vs_cpu": {
+  "fusion_score_max_abs_diff": 0.0005621531059838425,
+  "decisions_differing": 0,
+  "referrals_differing": 0
+ },
+ "reference": {
+  "estimated_hyfusion_gpu_ms": 200.98684960976243,
+  "estimated_hyfusion_cpu_ms": 505.24189975112677,
+  "estimated_founder_gpu_ms": 186.53335014823824,
+  "estimated_founder_cpu_ms": 356.1177001101896,
+  "models_only_peak_gpu_mb": {
+   "HyFusion": 919.2646484375,
+   "ECGFounder": 916.125
+  },
+  "cwt_only_peak_gpu_mb_4_beats": 274.92138671875
+ },
+ "setting": {
+  "patients": 50,
+  "median_pvc_beats": 4.0,
+  "repeats": 5,
+  "gpu": "NVIDIA GeForce RTX 5060 Ti",
+  "cpu_threads": 6,
+  "torch": "2.12.0.dev20260408+cu128",
+  "cwt": {
+   "cuda": "batched, float32",
+   "cpu": "batched, float64"
+  },
+  "founder_precision_gpu": "float16 autocast (as in the article)"
+ }
+}
