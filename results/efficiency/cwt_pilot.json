@@ -1,0 +1,135 @@
+{
+ "setting": {
+  "beats_per_patient": 4,
+  "timing_sets": 20,
+  "repeats": 20,
+  "rounds": 5,
+  "beat_dtype": "float64",
+  "fft_length": 4800,
+  "gpu": "NVIDIA GeForce RTX 5060 Ti",
+  "cpu_threads": 6,
+  "torch": "2.12.0.dev20260408+cu128"
+ },
+ "cwt_ms_per_patient": {
+  "pywt_per_beat_cpu": 750.4855000879616,
+  "cpu_float64": 103.58920006547123,
+  "cpu_float32": 55.895150057040155,
+  "gpu_float64": 12.89869996253401,
+  "gpu_float32": 3.1752499053254724
+ },
+ "cwt_ms_per_beat_batch64": {
+  "cpu_float64": 30.373359375516884,
+  "cpu_float32": 15.006939065642655,
+  "gpu_float64": 2.6230171861243434,
+  "gpu_float32": 0.7428765602526255
+ },
+ "peak_gpu_memory_mb": {
+  "gpu_float64": 503.99560546875,
+  "gpu_float32": 274.92138671875
+ },
+ "end_to_end": {
+  "pywt_per_beat_cpu": {
+   "cwt_ms_per_patient": 750.4855000879616,
+   "hyfusion_end_to_end_ms_gpu_inference": 948.2970997923985,
+   "hyfusion_end_to_end_ms_cpu_inference": 1152.138199773617
+  },
+  "cpu_float64": {
+   "cwt_ms_per_patient": 103.58920006547123,
+   "hyfusion_end_to_end_ms_gpu_inference": 301.4007997699082,
+   "hyfusion_end_to_end_ms_cpu_inference": 505.24189975112677
+  },
+  "cpu_float32": {
+   "cwt_ms_per_patient": 55.895150057040155,
+   "hyfusion_end_to_end_ms_gpu_inference": 253.7067497614771,
+   "hyfusion_end_to_end_ms_cpu_inference": 457.5478497426957
+  },
+  "gpu_float64": {
+   "cwt_ms_per_patient": 12.89869996253401,
+   "hyfusion_end_to_end_ms_gpu_inference": 210.71029966697097,
+   "hyfusion_end_to_end_ms_cpu_inference": 414.55139964818954
+  },
+  "gpu_float32": {
+   "cwt_ms_per_patient": 3.1752499053254724,
+   "hyfusion_end_to_end_ms_gpu_inference": 200.98684960976243,
+   "hyfusion_end_to_end_ms_cpu_inference": 404.827949590981
+  },
+  "table8_reference": {
+   "cwt_ms_per_patient": 652.4089998565614,
+   "hyfusion_end_to_end_ms_gpu_inference": 850.2205995609984,
+   "hyfusion_end_to_end_ms_cpu_inference": 1054.061699542217
+  },
+  "founder_end_to_end_ms_gpu": 186.53335014823824
+ },
+ "agreement_first_cohort": {
+  "patients": 329,
+  "beats": 1767,
+  "variants": {
+   "cpu_float64": {
+    "scalogram_max_abs": 1.0301481889740671e-13,
+    "beat_margin_max_abs": 0.0,
+    "patient_score_max_abs": 0.0,
+    "cnn_decisions_changed": 0
+   },
+   "cpu_float32": {
+    "scalogram_max_abs": 5.312315592736344e-05,
+    "beat_margin_max_abs": 3.62396240234375e-05,
+    "patient_score_max_abs": 1.2302398681551807e-05,
+    "cnn_decisions_changed": 0
+   },
+   "gpu_float64": {
+    "scalogram_max_abs": 6.418476861114186e-14,
+    "beat_margin_max_abs": 0.0,
+    "patient_score_max_abs": 0.0,
+    "cnn_decisions_changed": 0
+   },
+   "gpu_float32": {
+    "scalogram_max_abs": 4.156966975221721e-05,
+    "beat_margin_max_abs": 3.757476806676152e-05,
+    "patient_score_max_abs": 1.2588500976740136e-05,
+    "cnn_decisions_changed": 0
+   }
+  }
+ },
+ "second_cohort": {
+  "variant": "gpu_float32",
+  "patients": 106,
+  "lvot": 32,
+  "cnn_score_max_abs_diff": 0.0004414783074313533,
+  "fusion_score_max_abs_diff": 1.5028717361212363e-05,
+  "cnn_decisions_changed": 0,
+  "fusion_decisions_changed": 0,
+  "referral_changed": 0,
+  "cnn_pywt": {
+   "macro_f1": 0.6717610628308861,
+   "balanced_accuracy": 0.6841216216216216,
+   "auc": 0.7913851351351351,
+   "referral_coverage": 1.0,
+   "referral_macro_f1": 0.6717610628308861,
+   "referral_balanced_accuracy": 0.6841216216216216
+  },
+  "cnn_fast": {
+   "macro_f1": 0.6717610628308861,
+   "balanced_accuracy": 0.6841216216216216,
+   "auc": 0.7913851351351351,
+   "referral_coverage": 1.0,
+   "referral_macro_f1": 0.6717610628308861,
+   "referral_balanced_accuracy": 0.6841216216216216
+  },
+  "hyfusion_pywt": {
+   "macro_f1": 0.6839251829764164,
+   "balanced_accuracy": 0.7592905405405406,
+   "auc": 0.8610641891891891,
+   "referral_coverage": 0.44339622641509435,
+   "referral_macro_f1": 0.7847985347985348,
+   "referral_balanced_accuracy": 0.8076923076923077
+  },
+  "hyfusion_fast": {
+   "macro_f1": 0.6839251829764164,
+   "balanced_accuracy": 0.7592905405405406,
+   "auc": 0.8610641891891891,
+   "referral_coverage": 0.44339622641509435,
+   "referral_macro_f1": 0.7847985347985348,
+   "referral_balanced_accuracy": 0.8076923076923077
+  }
+ }
+}
