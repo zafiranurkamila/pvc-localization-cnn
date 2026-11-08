@@ -10,7 +10,8 @@ from the Journal of Medical Systems).
 - **Reproduction:** [docs/JOMS_REPRODUCIBILITY.md](docs/JOMS_REPRODUCIBILITY.md) lists data access, setup, seeds, the
   command behind every table and figure, and the commits that fixed the pre-specified analyses before their results.
 - **Main scripts:** `scripts/21`–`28` (first cohort), `scripts/29`–`32` (second cohort), `scripts/33`–`38` (analyses
-  without retraining), `scripts/39` (computational cost: parameters, FLOPs, inference time, memory). Weights of the final models developed on the first cohort (applied unchanged to the second) are available from the corresponding author on reasonable request;
+  without retraining), `scripts/39` (computational cost: parameters, FLOPs, inference time, memory), `scripts/40` (pilot optimisation
+  of the CWT: batched, exactly equivalent transform on CPU/GPU, `src/pvc_localization/features/wavelet_fast.py`). Weights of the final models developed on the first cohort (applied unchanged to the second) are available from the corresponding author on reasonable request;
   the models of the nested cross-validation and of local model adaptation were not stored and are reproduced with the code and the fixed seeds.
 
 ---
