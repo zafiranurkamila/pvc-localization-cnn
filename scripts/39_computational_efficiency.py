@@ -9,6 +9,8 @@ five-seed ensemble used in the article (ECGFounder: the evaluation crops of the 
 Preprocessing (filtering, R-peak detection and PVC-beat extraction; PSD and CWT of each beat; resampling and baseline
 removal for ECGFounder) is timed on real recordings of the first cohort. FLOPs are counted with
 torch.utils.flop_counter (one multiply-add = 2 FLOPs) on a single forward pass and scaled to the ensemble.
+Peak GPU memory is measured with only the models of each configuration loaded; inference times are the median of
+alternating rounds over the three configurations, so that GPU clock changes affect them alike.
 
 Run on the PC (GPU, data/processed, ECGFounder checkpoint, cached development models); a few minutes.
 Usage:
@@ -82,6 +84,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--patients", type=int, default=20, help="first-cohort recordings used for the timings")
     ap.add_argument("--repeats", type=int, default=50, help="timed repetitions per measurement")
+    ap.add_argument("--rounds", type=int, default=5, help="alternating timing rounds of the three configurations")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     gpu = torch.cuda.is_available()
@@ -142,32 +145,50 @@ def main():
                                "gflops_per_patient_ensemble": 5 * n_pass * f_one / 1e9}
     del c0, f0
 
+    @torch.no_grad()
+    def run_cnn(cnns, p, c):
+        return np.mean([(lambda z: (z[:, 1] - z[:, 0]).mean().item())(m(p, c)) for m in cnns])
+
+    @torch.no_grad()
+    def run_founder(fds, w, device):  # as in the article: half precision on the GPU (scripts/23)
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=device == "cuda"):
+            return np.mean([(lambda z: (z[:, 1] - z[:, 0]).float().mean().item())(m(w)) for m in fds])
+
+    configs = {"PSD-CWT CNN": (True, False), "ECGFounder": (False, True), "HyFusion": (True, True)}
     for device in (["cuda"] if gpu else []) + ["cpu"]:
-        cnns = [cnn(s, device) for s in dev["c_models"]]
-        fds = [founder(s, device) for s in dev["f_models"]]
         p, c, w = psd_x.to(device), cwt_x.to(device), crop_x.to(device)
 
-        @torch.no_grad()
-        def run_cnn():
-            return np.mean([(lambda z: (z[:, 1] - z[:, 0]).mean().item())(m(p, c)) for m in cnns])
+        def runner(use_cnn, use_founder, cnns, fds):
+            # HyFusion runs both ensembles; the weighted average of two standardized scores is negligible
+            def fn():
+                s = 0.0
+                if use_cnn:
+                    s += run_cnn(cnns, p, c)
+                if use_founder:
+                    s += run_founder(fds, w, device)
+                return s
+            return fn
 
-        @torch.no_grad()
-        def run_founder():  # as in the article: half precision on the GPU (scripts/23)
-            with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=device == "cuda"):
-                return np.mean([(lambda z: (z[:, 1] - z[:, 0]).float().mean().item())(m(w)) for m in fds])
-
-        def run_hyfusion():  # the weighted average of two standardized scores is negligible
-            return 0.5 * run_founder() + 0.5 * run_cnn()
-
-        reps = args.repeats if device == "cuda" else max(5, args.repeats // 5)
-        for name, fn in [("PSD-CWT CNN", run_cnn), ("ECGFounder", run_founder), ("HyFusion", run_hyfusion)]:
-            if device == "cuda":
+        if device == "cuda":  # peak memory with only the models of each configuration on the GPU
+            for name, (uc, uf) in configs.items():
                 torch.cuda.empty_cache(); torch.cuda.reset_peak_memory_stats()
-            ms = timed(fn, reps, device)
-            r = res["models"].setdefault(name, {})
-            r[f"inference_ms_per_patient_{device}"] = ms
-            if device == "cuda":
-                r["peak_gpu_memory_mb"] = torch.cuda.max_memory_allocated() / 2 ** 20
+                cnns = [cnn(s, device) for s in dev["c_models"]] if uc else []
+                fds = [founder(s, device) for s in dev["f_models"]] if uf else []
+                runner(uc, uf, cnns, fds)()
+                res["models"].setdefault(name, {})["peak_gpu_memory_mb"] = torch.cuda.max_memory_allocated() / 2 ** 20
+                del cnns, fds
+                torch.cuda.empty_cache()
+
+        # timing: all models loaded once, the three configurations measured in alternating rounds
+        cnns = [cnn(s, device) for s in dev["c_models"]]
+        fds = [founder(s, device) for s in dev["f_models"]]
+        reps = args.repeats if device == "cuda" else max(5, args.repeats // 5)
+        rounds = {name: [] for name in configs}
+        for _ in range(args.rounds):
+            for name, (uc, uf) in configs.items():
+                rounds[name].append(timed(runner(uc, uf, cnns, fds), reps, device))
+        for name in configs:
+            res["models"].setdefault(name, {})[f"inference_ms_per_patient_{device}"] = float(np.median(rounds[name]))
         del cnns, fds
         if device == "cuda":
             torch.cuda.empty_cache()
@@ -187,7 +208,7 @@ def main():
                                                      + pre["founder_resample_baseline_crops_ms_per_recording"]
                                                      + hy[f"inference_ms_per_patient_{device}"])
     res["setting"] = {"beats_per_patient": BEATS_PER_PATIENT, "founder_crops_per_patient": n_crops, "ensemble": 5,
-                      "timing_patients": args.patients, "repeats": args.repeats,
+                      "timing_patients": args.patients, "repeats": args.repeats, "rounds": args.rounds,
                       "gpu": torch.cuda.get_device_name(0) if gpu else None, "cpu": platform.processor(),
                       "torch": torch.__version__, "cpu_threads": torch.get_num_threads()}
     (OUT / "efficiency.json").write_text(json.dumps(res, indent=1))
