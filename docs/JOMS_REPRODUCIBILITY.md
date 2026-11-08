@@ -70,6 +70,7 @@ python scripts/23_nested_cv_ecgfounder.py --check
 | QC of the second-cohort extraction (sensitivity analysis) | `python scripts/38_upf_extraction_qc.py data/external/otva_upf/all_points_may_2024.pkl` | Methods 2.5, Results 3.4, Supplementary results |
 | Computational cost (parameters, FLOPs, inference time, peak GPU memory, preprocessing time) | `python scripts/39_computational_efficiency.py` | Methods 2.7, Results 3.5, Table 8 (JOS version) |
 | Pilot optimisation of the CWT (timing, agreement with pywt, second-cohort re-evaluation; after scripts/31 and 39) | `python scripts/40_cwt_optimization_pilot.py data/external/otva_upf/all_points_may_2024.pkl` | Methods 2.7, Results 3.5, Table 8 (JOS version, batched CWT) |
+| Integrated pipeline benchmark (measured end-to-end time, peak GPU memory of the whole pipeline; after scripts/39 and 40) | `python scripts/41_integrated_pipeline_benchmark.py` | Methods 2.7, Results 3.5, Table 8 (JOS version, integrated pipeline) |
 
 Scripts 33, 35 and 37 use only saved predictions (no GPU); script 38 re-scores the second cohort with the stored
 development models of (i) (`data/interim/external_final/development_ens5.pt`, written by script 31), without training. The development runs of Table S1 are the earlier result files
@@ -87,7 +88,7 @@ in `results/nested_cv/` (split 42).
 
 Analyses added after the review of the draft (no model retrained): `scripts/33` (commit `3e46563`), `scripts/34`
 and its completed form (`a44eac5`), `scripts/35` (`fc14b5e`), `scripts/36` (`2309566`), `scripts/37` and `scripts/38`
-(`f57f6bc`, results `b80fe01`), `scripts/39` (`b051b20`, `ea6f8af`; results `41ccbd9`), `scripts/40` (`bf24a11`, `d880edc`; results `249cee6`).
+(`f57f6bc`, results `b80fe01`), `scripts/39` (`b051b20`, `ea6f8af`; results `41ccbd9`), `scripts/40` (`bf24a11`, `d880edc`; results `249cee6`), `scripts/41` (`40309e6`; results `e3d9e52`).
 
 ## Outputs
 
