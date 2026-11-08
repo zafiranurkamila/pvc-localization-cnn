@@ -1,6 +1,6 @@
 """Batched CWT scalogram, numerically equivalent to extract_cwt_scalogram (pywt.cwt, method="fft"), on CPU or GPU.
 
-Same wavelet, scales, sampled wavelet integral (pywt.integrate_wavelet, precision 10), convolution, differencing,
+Same wavelet, scales, sampled wavelet integral (pywt.integrate_wavelet, precision 12 as in pywt.cwt), convolution, differencing,
 trimming, 8-sample averaging and log1p as features/wavelet.py. Two changes affect only the computation:
 
 1. Kernel truncation. pywt convolves each beat (N = 1600 samples) with the full sampled wavelet of each scale (up
@@ -31,7 +31,7 @@ class FastCWT:
         w = pywt.ContinuousWavelet(wavelet)
         freqs = np.geomspace(config.CWT_FMIN_HZ, config.FEATURE_FMAX_HZ, n_scales)
         scales = pywt.central_frequency(wavelet) * fs / freqs
-        int_psi, x = pywt.integrate_wavelet(w, precision=10)
+        int_psi, x = pywt.integrate_wavelet(w, precision=12)  # pywt.cwt default precision
         real = np.dtype(input_dtype)
         cplx = np.result_type(real, np.complex64)
         int_psi = np.asarray(np.conj(int_psi), dtype=cplx)
