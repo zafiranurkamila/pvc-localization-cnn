@@ -1,0 +1,63 @@
+{
+ "preprocessing_cpu": {
+  "filter_rpeaks_pvc_extraction_ms_per_recording": 40.70675012189895,
+  "psd_ms_per_beat": 1.2354499194771051,
+  "cwt_ms_per_beat": 163.10224996414036,
+  "founder_resample_baseline_crops_ms_per_recording": 10.875800042413175,
+  "cnn_features_ms_per_patient": 657.3507995344698
+ },
+ "models": {
+  "PSD-CWT CNN": {
+   "parameters": 162706,
+   "parameters_ensemble": 813530,
+   "size_mb": 0.6206741333007812,
+   "size_mb_ensemble": 3.1033706665039062,
+   "gflops_per_pass": 0.207171712,
+   "passes_per_patient": 4,
+   "gflops_per_patient_ensemble": 4.14343424,
+   "peak_gpu_memory_mb": 53.50439453125,
+   "inference_ms_per_patient_cuda": 5.579400109127164,
+   "inference_ms_per_patient_cpu": 39.29655009415001,
+   "end_to_end_ms_per_patient_cuda": 703.636949765496,
+   "end_to_end_ms_per_patient_cpu": 737.3540997505188
+  },
+  "ECGFounder": {
+   "parameters": 30667314,
+   "parameters_ensemble": 153336570,
+   "size_mb": 116.98651885986328,
+   "size_mb_ensemble": 584.9325942993164,
+   "gflops_per_pass": 2.336979456,
+   "passes_per_patient": 3,
+   "gflops_per_patient_ensemble": 35.05469184,
+   "peak_gpu_memory_mb": 916.125,
+   "inference_ms_per_patient_cuda": 134.95079998392612,
+   "inference_ms_per_patient_cpu": 304.5351499458775,
+   "end_to_end_ms_per_patient_cuda": 186.53335014823824,
+   "end_to_end_ms_per_patient_cpu": 356.1177001101896
+  },
+  "HyFusion": {
+   "peak_gpu_memory_mb": 919.2646484375,
+   "inference_ms_per_patient_cuda": 141.2872498622164,
+   "inference_ms_per_patient_cpu": 345.128349843435,
+   "parameters": 30830020,
+   "parameters_ensemble": 154150100,
+   "size_mb": 117.60719299316406,
+   "size_mb_ensemble": 588.0359649658203,
+   "gflops_per_patient_ensemble": 39.198126079999994,
+   "end_to_end_ms_per_patient_cuda": 850.2205995609984,
+   "end_to_end_ms_per_patient_cpu": 1054.061699542217
+  }
+ },
+ "setting": {
+  "beats_per_patient": 4,
+  "founder_crops_per_patient": 3,
+  "ensemble": 5,
+  "timing_patients": 20,
+  "repeats": 50,
+  "rounds": 5,
+  "gpu": "NVIDIA GeForce RTX 5060 Ti",
+  "cpu": "AMD64 Family 23 Model 113 Stepping 0, AuthenticAMD",
+  "torch": "2.12.0.dev20260408+cu128",
+  "cpu_threads": 6
+ }
+}

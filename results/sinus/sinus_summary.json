@@ -1,0 +1,32 @@
+{
+ "patients": 329,
+ "patients_with_pvc_beats": 329,
+ "with_sinus_template": 329,
+ "without_sinus_template": 0,
+ "by_label": {
+  "LVOT": {
+   "with_pvc": 75,
+   "with_sinus": 75
+  },
+  "RVOT": {
+   "with_pvc": 254,
+   "with_sinus": 254
+  }
+ },
+ "by_split": {
+  "test": {
+   "with_pvc": 66,
+   "with_sinus": 66
+  },
+  "train": {
+   "with_pvc": 263,
+   "with_sinus": 263
+  }
+ },
+ "sinus_beats_per_patient_median": 10.0,
+ "sinus_beats_per_patient_q1_q3": [
+  6.0,
+  16.0
+ ],
+ "patients_without_sinus": []
+}
