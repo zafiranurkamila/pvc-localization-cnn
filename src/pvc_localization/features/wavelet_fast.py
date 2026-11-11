@@ -52,7 +52,8 @@ class FastCWT:
         cdtype = torch.complex128 if dtype == torch.float64 else torch.complex64
         self.device, self.dtype = device, dtype
         self.kf = torch.tensor(kf, dtype=cdtype, device=device)
-        self.idx = torch.tensor(np.array(starts)[:, None] + np.arange(n + 1)[None, :], device=device)  # (S, N+1)
+        self.idx = torch.tensor(np.array(starts)[:, None] + np.arange(n + 1)[None, :], dtype=torch.long,
+                                device=device)  # (S, N+1); int64, as gather requires (numpy < 2 gives int32 on Windows)
         self.sqrt_scale = torch.tensor(np.sqrt(scales), dtype=dtype, device=device)[:, None]
         self.n, self.ds = n, config.CWT_TIME_DOWNSAMPLE
 
